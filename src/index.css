@@ -1,0 +1,14 @@
+html{
+        background-color: black;
+        color: red;
+}
+#grid{
+        background-color: grey;
+        display: grid; 
+        width: 40vw; 
+        aspect-ratio: 2/1;
+        margin-inline: auto;
+        grid-template-rows: repeat(10, 1fr);
+        grid-template-columns: repeat(10, 1fr);
+        gap: 10px;
+}
