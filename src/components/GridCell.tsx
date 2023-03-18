@@ -6,20 +6,30 @@ import {
     CalendarViewWeekSharp,
     CheckBoxOutlineBlankSharp as OpenCellIcon,
 } from '@mui/icons-material'
-import { Action, Cell } from '../App'
+import { CellReducerActions, Cell } from '../App'
+import { animated, SpringRef, SpringValue } from '@react-spring/web'
 
 interface GridCellProps {
     cellProperties: Cell
     cellId: number
-    dispatch: React.Dispatch<Action>
+    dispatch: React.Dispatch<CellReducerActions>
+    cellProps: { [key: string]: SpringValue<number> | SpringValue<string> }
     isMouseLeftButtonPressed: boolean
 }
-
+const AnimatedPaper = animated(Paper)
 // const GridCell = (props: React.PropsWithChildren<GridCellProps>) => {
-const GridCell = ({ cellId, cellProperties, dispatch, isMouseLeftButtonPressed, ...props }: GridCellProps) => {
+const GridCell = ({
+    cellId,
+    cellProperties,
+    cellProps,
+    dispatch,
+    isMouseLeftButtonPressed,
+    ...props
+}: GridCellProps) => {
     return (
         <>
-            <div
+            <animated.div
+                style={{ ...cellProps }}
                 onMouseEnter={(e: React.MouseEvent) => {
                     isMouseLeftButtonPressed &&
                         dispatch({ type: 'flipCellOpenCloseStatus', payload: { cellId: cellId } })
@@ -53,7 +63,7 @@ const GridCell = ({ cellId, cellProperties, dispatch, isMouseLeftButtonPressed, 
                             return <CalendarViewWeekSharp />
                     }
                 })()}
-            </div>
+            </animated.div>
         </>
     )
 }

@@ -1,29 +1,36 @@
 import { Grid } from '../App'
 
-const coordinateToCellId = (gridColumnSize: number, [row, col]: [number, number]) => row * gridColumnSize + col
-
-export let dfs = (grid: Grid, gridStartPoint: [number, number], gridEndPoint: [number, number]) => {
+export const dfs = (
+    grid: Grid,
+    gridStartPoint: [number, number],
+    gridEndPoint: [number, number],
+    changeCellVisitedStatus: (id: number) => void,
+    resetGlobalTimeoutTimer: () => void
+) => {
     const visited: Set<number> = new Set()
     const gridSize = grid.properties.rows * grid.properties.columns
 
     const search = (currValue: [number, number]): boolean => {
-        const [x, y] = currValue
-        const currCellId = coordinateToCellId(grid.properties.columns, [y, x])
+        const [row, col] = currValue
+        const currCellId = grid.helperFunctions.coordinateToCellId([row, col])
         if (
-            grid.cell[currCellId]?.cellType === undefined ||
-            grid.cell[currCellId].cellType === 'close' ||
-            x >= grid.properties.columns ||
-            y >= grid.properties.rows ||
-            x < 0 ||
-            y < 0 ||
+            col >= grid.properties.columns ||
+            row >= grid.properties.rows ||
+            col < 0 ||
+            row < 0 ||
             visited.has(currCellId)
-        ) {
+        )
+            return false
+        if (grid.cell[currCellId]?.cellType === undefined || grid.cell[currCellId].cellType === 'close') {
             visited.add(currCellId)
             return false
         }
         if (grid.cell[currCellId].cellType === 'end') return true
+
         visited.add(currCellId)
-        return search([x + 1, y]) || search([x - 1, y]) || search([x, y + 1]) || search([x, y - 1])
+        changeCellVisitedStatus(currCellId)
+        return search([row + 1, col]) || search([row - 1, col]) || search([row, col + 1]) || search([row, col - 1])
     }
+    resetGlobalTimeoutTimer()
     return search(gridStartPoint)
 }
