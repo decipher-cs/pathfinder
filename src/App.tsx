@@ -5,6 +5,7 @@ import './index.css'
 import GridCell from './components/GridCell'
 import { dfs } from './pathfindingAlgorithms/dfs'
 import { SpringProps, SpringRef, SpringValue, useSpring, useSprings } from '@react-spring/web'
+import { bfs } from './pathfindingAlgorithms/bfs'
 
 export type CellType = 'open' | 'close' | 'start' | 'end'
 
@@ -15,10 +16,14 @@ export interface Cell {
     cellVisited: boolean
 }
 
-export interface GridHelperFuntions {
-    coordinateToCellId: ([row, col]: [number, number]) => number
-    cellIdToCoordinate?: (cellId: number) => [number, number]
-}
+// export interface GridHelperFuntions {
+//     coordinateToCellId: ([row, col]: [number, number]) => number
+//     cellIdToCoordinate: (cellId: number) => [number, number]
+//     getStartingCellId: any
+//     getEndingCellId: () => Cell['cellId']
+//     getStartingCellCoordinates: () => [number, number] | number
+//     getEndingCellCoordinates: () => [number, number] | number
+// }
 
 export interface GridProperties {
     rows: number
@@ -29,8 +34,7 @@ export interface GridProperties {
 export interface Grid {
     cell: { [key: string | number]: Cell }
     properties: GridProperties
-    helperFunctions: GridHelperFuntions
-    // helperFunctions: { [key: string]: () => void }
+    // helperFunctions: GridHelperFuntions
 }
 
 export type CellReducerActions = {
@@ -46,6 +50,36 @@ export type CellReducerActions = {
         cellId: number // This is the id that corresponds to cellCoordinates. Ex. <0,0> = id: 0, <0,1> = id: 1 ...
         newCellType?: CellType
         newCellVisitedStatus?: boolean
+    }
+}
+
+export const gridHelperFunctions = (grid: Grid) => {
+    const { rows, columns, size } = grid.properties
+    let coordinateToCellId = ([row, col]: [number, number]) => row * columns + col
+    let cellIdToCoordinate = (id: number) => [Math.floor(id / columns), id % columns]
+    let getEndingCellId = () => {
+        for (const key in grid.cell) {
+            if (grid.cell[key].cellType === 'end') return Number(key)
+        }
+        return Infinity
+    }
+    let getStartingCellId = () => {
+        for (const key in grid.cell) {
+            if (grid.cell[key].cellType === 'start') return Number(key)
+        }
+        return Infinity
+    }
+    let getStartingCellCoordinates = () => grid.cell[getStartingCellId()].cellCoordinates
+
+    let getEndingCellCoordinates = () => grid.cell[getEndingCellId()].cellCoordinates
+
+    return {
+        coordinateToCellId,
+        cellIdToCoordinate,
+        getEndingCellId,
+        getStartingCellId,
+        getStartingCellCoordinates,
+        getEndingCellCoordinates,
     }
 }
 
@@ -68,9 +102,8 @@ const gridConstructor = (m: number, n: number): Grid => {
             }
         }
     }
-    grid.helperFunctions = {
-        coordinateToCellId: ([row, col]: [number, number]) => row * n + col,
-    }
+    cell[44].cellType = 'start'
+    cell[99].cellType = 'end'
     grid.cell = cell
     return grid
 }
@@ -86,17 +119,13 @@ const App = (): JSX.Element => {
         }
     }
 
-    const [cellSprings, cellSpringsApi] = useSprings(
-        // gridState.properties.rows * gridState.properties.columns,
-        36,
-        index => ({
-            to: {
-                opacity: 1,
-                backgroundColor: 'white',
-            },
-            delay: index * 10,
-        })
-    )
+    const [cellSprings, cellSpringsApi] = useSprings(100, index => ({
+        to: {
+            opacity: 1,
+            backgroundColor: 'white',
+        },
+        delay: index * 10,
+    }))
 
     let reducer =
         (springApi: typeof cellSpringsApi) =>
@@ -191,13 +220,7 @@ const App = (): JSX.Element => {
             return clonedGrid
         }
 
-    const [gridState, dispatch] = useReducer(reducer(cellSpringsApi), gridConstructor(6, 6))
-
-    const getStartCellCoordinates = () =>
-        Object.values(gridState.cell).find(val => val.cellType === 'start')?.cellCoordinates
-
-    const getEndCellCoordinates = () =>
-        Object.values(gridState.cell).find(val => val.cellType === 'end')?.cellCoordinates
+    const [gridState, dispatch] = useReducer(reducer(cellSpringsApi), gridConstructor(10, 10))
 
     const globalTimeoutTimer = useRef(0)
 
@@ -213,12 +236,16 @@ const App = (): JSX.Element => {
     const resetGlobalTimeoutTimer = () => (globalTimeoutTimer.current = 0)
 
     let startSearch = () => {
-        const startCellCoordinates = getStartCellCoordinates()
-        const endCellCoordinates = getEndCellCoordinates()
-        if (startCellCoordinates !== undefined && endCellCoordinates !== undefined) {
-            const result = dfs(gridState, startCellCoordinates, endCellCoordinates, dispatchWithTimeout, resetGlobalTimeoutTimer)
-            console.log('starting point: ', startCellCoordinates, 'end point: ', endCellCoordinates, 'result: ', result)
-        } else console.log('undefined start/end point(s)')
+        // const getStartCellCoordinates = () =>
+        //     Object.values(gridState.cell).find(val => val.cellType === 'start')?.cellCoordinates
+        //
+        // const getEndCellCoordinates = () =>
+        //     Object.values(gridState.cell).find(val => val.cellType === 'end')?.cellCoordinates
+        // const startCellCoordinates = getStartCellCoordinates()
+        // const endCellCoordinates = getEndCellCoordinates()
+        resetGlobalTimeoutTimer()
+        const result = bfs(gridState, dispatchWithTimeout, resetGlobalTimeoutTimer)
+        // const result = dfs(gridState, startCellCoordinates, endCellCoordinates, dispatchWithTimeout, resetGlobalTimeoutTimer)
     }
 
     return (

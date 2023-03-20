@@ -10,8 +10,8 @@ export const dfs = (
     const visited: Set<number> = new Set()
     const gridSize = grid.properties.rows * grid.properties.columns
 
-    const search = (currValue: [number, number]): boolean => {
-        const [row, col] = currValue
+    const search = (currValueInCoordinates: [number, number]): boolean => {
+        const [row, col] = currValueInCoordinates
         const currCellId = grid.helperFunctions.coordinateToCellId([row, col])
         if (
             col >= grid.properties.columns ||
