@@ -1,13 +1,33 @@
-import { Box, Paper, Button, Chip, Container } from '@mui/material'
+import {
+    Box,
+    Paper,
+    Button,
+    Chip,
+    Container,
+    RadioGroup,
+    FormControl,
+    FormLabel,
+    FormControlLabel,
+    Radio,
+    Alert,
+    Snackbar,
+    AlertProps,
+    AlertColor,
+} from '@mui/material'
 import { cloneDeep } from 'lodash'
-import { useReducer, useRef, useState } from 'react'
+import { useEffect, useReducer, useRef, useState } from 'react'
 import './index.css'
 import GridCell from './components/GridCell'
 import { dfs } from './pathfindingAlgorithms/dfs'
-import { SpringProps, SpringRef, SpringValue, useSpring, useSprings } from '@react-spring/web'
+import { animated, SpringProps, SpringRef, SpringValue, useSpring, useSprings, useSpringValue } from '@react-spring/web'
 import { bfs } from './pathfindingAlgorithms/bfs'
+import { dijkstra } from './pathfindingAlgorithms/dijkstra'
 
 export type CellType = 'open' | 'close' | 'start' | 'end'
+
+export type CursorSelectionType = 'start' | 'end' | 'open/close'
+
+export type Algorithm = 'bfs' | 'dfs' | 'astar' | 'dijkstra'
 
 export interface Cell {
     cellId: number
@@ -24,6 +44,15 @@ export interface Cell {
 //     getStartingCellCoordinates: () => [number, number] | number
 //     getEndingCellCoordinates: () => [number, number] | number
 // }
+
+export interface AlgorithmFluff {
+    startingPoint: number
+    endingPoint: number
+    unavailableCells: number[]
+    rows: number
+    columns: number
+    size: number
+}
 
 export interface GridProperties {
     rows: number
@@ -53,35 +82,43 @@ export type CellReducerActions = {
     }
 }
 
-export const gridHelperFunctions = (grid: Grid) => {
-    const { rows, columns, size } = grid.properties
-    let coordinateToCellId = ([row, col]: [number, number]) => row * columns + col
-    let cellIdToCoordinate = (id: number) => [Math.floor(id / columns), id % columns]
-    let getEndingCellId = () => {
-        for (const key in grid.cell) {
-            if (grid.cell[key].cellType === 'end') return Number(key)
-        }
-        return Infinity
-    }
-    let getStartingCellId = () => {
-        for (const key in grid.cell) {
-            if (grid.cell[key].cellType === 'start') return Number(key)
-        }
-        return Infinity
-    }
-    let getStartingCellCoordinates = () => grid.cell[getStartingCellId()].cellCoordinates
-
-    let getEndingCellCoordinates = () => grid.cell[getEndingCellId()].cellCoordinates
-
-    return {
-        coordinateToCellId,
-        cellIdToCoordinate,
-        getEndingCellId,
-        getStartingCellId,
-        getStartingCellCoordinates,
-        getEndingCellCoordinates,
-    }
+export const gridHelperFunctions = {
+    coordinateToCellId: ([row, col]: [number, number], columns: number) => row * columns + col,
+    cellIdToCoordinate: (id: number, columns: number): [number, number] => [Math.floor(id / columns), id % columns],
+    // getEndingCellId: () => {},
+    // getStartingCellId: () => {},
+    // getStartingCellCoordinates: () => grid.cell[getStartingCellId()].cellCoordinates,
+    // getEndingCellCoordinates: () => grid.cell[getEndingCellId()].cellCoordinates,
 }
+// export const gridHelperFunctions = (grid: Grid) => {
+//     const { rows, columns, size } = grid.properties
+//     let coordinateToCellId = ([row, col]: [number, number]) => row * columns + col
+//     let cellIdToCoordinate = (id: number) => [Math.floor(id / columns), id % columns]
+//     let getEndingCellId = () => {
+//         for (const key in grid.cell) {
+//             if (grid.cell[key].cellType === 'end') return Number(key)
+//         }
+//         return Infinity
+//     }
+//     let getStartingCellId = () => {
+//         for (const key in grid.cell) {
+//             if (grid.cell[key].cellType === 'start') return Number(key)
+//         }
+//         return Infinity
+//     }
+//     let getStartingCellCoordinates = () => grid.cell[getStartingCellId()].cellCoordinates
+//
+//     let getEndingCellCoordinates = () => grid.cell[getEndingCellId()].cellCoordinates
+//
+//     return {
+//         coordinateToCellId,
+//         cellIdToCoordinate,
+//         getEndingCellId,
+//         getStartingCellId,
+//         getStartingCellCoordinates,
+//         getEndingCellCoordinates,
+//     }
+// }
 
 const gridConstructor = (m: number, n: number): Grid => {
     let grid: Grid = Object()
@@ -102,201 +139,237 @@ const gridConstructor = (m: number, n: number): Grid => {
             }
         }
     }
-    cell[44].cellType = 'start'
-    cell[99].cellType = 'end'
     grid.cell = cell
+    cell[3].cellType = 'start'
+    cell[40].cellType = 'end'
     return grid
 }
+const globalRows = 10
+const globalColumns = 10
+
+let reducer = (grid: Grid, action: CellReducerActions): Grid => {
+    let { type: actionType, payload: { cellId, newCellType, newCellVisitedStatus } = {} } = action
+    let clonedGrid = cloneDeep(grid)
+    switch (actionType) {
+        case 'changeCellTypeToStart':
+            if (cellId === undefined) break
+            Object.keys(clonedGrid.cell).forEach(key => {
+                if (clonedGrid.cell[key].cellType === 'start') {
+                    clonedGrid.cell[key].cellType = 'open'
+                }
+            })
+            clonedGrid.cell[cellId].cellType = 'start'
+            break
+
+        case 'changeCellTypeToEnd':
+            if (cellId === undefined) break
+            Object.keys(clonedGrid.cell).forEach(key => {
+                if (clonedGrid.cell[key].cellType === 'end') {
+                    clonedGrid.cell[key].cellType = 'open'
+                }
+            })
+            clonedGrid.cell[cellId].cellType = 'end'
+            break
+
+        case 'resetVisitedCell':
+            Object.keys(clonedGrid.cell).forEach(key => {
+                if (clonedGrid.cell[key].cellVisited === true) {
+                    clonedGrid.cell[key].cellVisited = false
+                }
+            })
+            break
+
+        case 'hardResetAllGrid':
+            Object.keys(clonedGrid.cell).forEach(key => {
+                clonedGrid.cell[key].cellType = 'open'
+                clonedGrid.cell[key].cellVisited = false
+            })
+            break
+
+        case 'flipCellOpenCloseStatus':
+            if (cellId === undefined) break
+            if (clonedGrid.cell[cellId].cellType === 'open') {
+                clonedGrid.cell[cellId].cellType = 'close'
+            } else if (clonedGrid.cell[cellId].cellType === 'close') {
+                clonedGrid.cell[cellId].cellType = 'open'
+            }
+
+            break
+
+        case 'changeCellType':
+            if (cellId === undefined || newCellType === undefined) break
+            clonedGrid.cell[cellId].cellType = newCellType
+            break
+
+        case 'changeCellVisitedStatusToTrue':
+            if (cellId === undefined) break
+            clonedGrid.cell[cellId].cellVisited = true
+            break
+
+        default:
+            break
+    }
+    return clonedGrid
+}
+
+// const Notification = (props: { severity: AlertColor; autoHide?: number; showSnackbar: boolean }) => {
+//     return (
+//         <Snackbar autoHideDuration={props.autoHide || 6000} open={props.showSnackbar}>
+//             <Alert severity={props.severity} onClose={}>fasdas</Alert>
+//         </Snackbar>
+//     )
+// }
 
 const App = (): JSX.Element => {
+    // const [showSnackbar, setShowSnackbar] = useState(true)
+
     const [isMouseLeftButtonPressed, setIsMouseLeftButtonPressed] = useState(false)
+
+    const [cursorClickActionMode, setCursorClickActionMode] = useState<CursorSelectionType>('open/close')
+
+    const [selectedAlgorithm, setSelectedAlgorithm] = useState<Algorithm>('dijkstra')
+
+    const [cellSprings, cellSpringsApi] = useSprings(globalRows * globalColumns, index => ({
+        to: {
+            opacity: 1,
+            backgroundColor: 'white',
+        },
+        delay: index * 100,
+    }))
+
+    const [gridState, dispatch] = useReducer(reducer, gridConstructor(globalRows, globalColumns))
 
     const handleMouseMoveWhileLeftBtnPressed = (event: React.MouseEvent<HTMLDivElement>) => {
         if (event.buttons === 1) {
             setIsMouseLeftButtonPressed(true)
+            // setCursorClickActionMode('open')
         } else {
             setIsMouseLeftButtonPressed(false)
         }
     }
 
-    const [cellSprings, cellSpringsApi] = useSprings(100, index => ({
-        to: {
-            opacity: 1,
-            backgroundColor: 'white',
-        },
-        delay: index * 10,
-    }))
-
-    let reducer =
-        (springApi: typeof cellSpringsApi) =>
-        (grid: Grid, action: CellReducerActions): Grid => {
-            let { type: actionType, payload: { cellId, newCellType, newCellVisitedStatus } = {} } = action
-            let clonedGrid = cloneDeep(grid)
-
-            switch (actionType) {
-                case 'changeCellTypeToStart':
-                    if (cellId === undefined) break
-                    Object.keys(clonedGrid.cell).forEach(key => {
-                        if (clonedGrid.cell[key].cellType === 'start') {
-                            clonedGrid.cell[key].cellType = 'open'
-                            springApi.start((i: number) => {
-                                if (i === Number(key)) return { backgroundColor: 'white' }
-                            })
-                        }
-                    })
-                    clonedGrid.cell[cellId].cellType = 'start'
-                    springApi.start((i: number) => {
-                        if (i === cellId) return { backgroundColor: 'green' }
-                    })
-                    break
-
-                case 'changeCellTypeToEnd':
-                    if (cellId === undefined) break
-                    Object.keys(clonedGrid.cell).forEach(key => {
-                        if (clonedGrid.cell[key].cellType === 'end') {
-                            clonedGrid.cell[key].cellType = 'open'
-                            springApi.start((i: number) => {
-                                if (i === Number(key)) return { backgroundColor: 'white' }
-                            })
-                        }
-                    })
-                    clonedGrid.cell[cellId].cellType = 'end'
-                    springApi.start((i: number) => {
-                        if (i === cellId) return { backgroundColor: 'red' }
-                    })
-                    break
-
-                case 'resetVisitedCell':
-                    Object.keys(clonedGrid.cell).forEach(key => {
-                        if (clonedGrid.cell[key].cellVisited === true) {
-                            clonedGrid.cell[key].cellVisited = false
-                            cellSpringsApi.start((i: number) => {
-                                if (i === Number(key)) return { backgroundColor: 'white' }
-                            })
-                        }
-                    })
-                    break
-
-                case 'hardResetAllGrid':
-                    Object.keys(clonedGrid.cell).forEach(key => {
-                        clonedGrid.cell[key].cellType = 'open'
-                        clonedGrid.cell[key].cellVisited = false
-                    })
-                    cellSpringsApi.start(() => ({ backgroundColor: 'white' }))
-                    break
-
-                case 'flipCellOpenCloseStatus':
-                    if (cellId === undefined) break
-                    if (clonedGrid.cell[cellId].cellType === 'open') {
-                        clonedGrid.cell[cellId].cellType = 'close'
-                        cellSpringsApi.start((i: number) => {
-                            if (i === cellId) return { backgroundColor: 'blue' }
-                        })
-                    } else {
-                        clonedGrid.cell[cellId].cellType = 'open'
-                        cellSpringsApi.start((i: number) => {
-                            if (i === cellId) return { backgroundColor: 'white' }
-                        })
-                    }
-
-                    break
-
-                case 'changeCellType':
-                    if (cellId === undefined || newCellType === undefined) break
-                    clonedGrid.cell[cellId].cellType = newCellType
-                    break
-
-                case 'changeCellVisitedStatusToTrue':
-                    if (cellId === undefined) break
-                    clonedGrid.cell[cellId].cellVisited = true
-                    springApi.start((i: number) => {
-                        if (i === cellId) return { backgroundColor: 'cyan' }
-                    })
-                    break
-
-                default:
-                    break
-            }
-            return clonedGrid
+    const handleCursorClickSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const arr: CursorSelectionType[] = ['open/close', 'start', 'end']
+        if (arr.includes(e.target.value as CursorSelectionType)) {
+            setCursorClickActionMode(e.target.value as CursorSelectionType)
         }
-
-    const [gridState, dispatch] = useReducer(reducer(cellSpringsApi), gridConstructor(10, 10))
-
-    const globalTimeoutTimer = useRef(0)
-
-    const dispatchWithTimeout = (cellId: number) => {
-        const waitTime = 100
-        setTimeout(
-            () => dispatch({ type: 'changeCellVisitedStatusToTrue', payload: { cellId } }),
-            globalTimeoutTimer.current * waitTime
-        )
-        globalTimeoutTimer.current = globalTimeoutTimer.current + 1
     }
 
-    const resetGlobalTimeoutTimer = () => (globalTimeoutTimer.current = 0)
-
-    let startSearch = () => {
-        // const getStartCellCoordinates = () =>
-        //     Object.values(gridState.cell).find(val => val.cellType === 'start')?.cellCoordinates
-        //
-        // const getEndCellCoordinates = () =>
-        //     Object.values(gridState.cell).find(val => val.cellType === 'end')?.cellCoordinates
-        // const startCellCoordinates = getStartCellCoordinates()
-        // const endCellCoordinates = getEndCellCoordinates()
-        resetGlobalTimeoutTimer()
-        const result = bfs(gridState, dispatchWithTimeout, resetGlobalTimeoutTimer)
-        // const result = dfs(gridState, startCellCoordinates, endCellCoordinates, dispatchWithTimeout, resetGlobalTimeoutTimer)
+    const handleAlgorithmSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const arr: Algorithm[] = ['bfs', 'dfs', 'astar', 'dijkstra']
+        if (arr.includes(e.target.value as Algorithm)) {
+            setSelectedAlgorithm(e.target.value as Algorithm)
+        }
     }
 
+    const runSelectedAlgorithm = (selectedAlgorithm: Algorithm) => {
+        /* algorithm parameters should take the follwing properties
+         * Grid Starting/ Ending Point
+         * Unavailable cells aka walls
+         */
+        const gridCells = Object.entries(gridState.cell)
+        let canContinue: boolean = true
+
+        // put snackbar here
+        dispatch({ type: 'resetVisitedCell' })
+        const algorithmFluff: AlgorithmFluff = {
+            startingPoint: (() => {
+                const cell = gridCells.find(cell => cell[1].cellType === 'start')
+                if (cell === undefined) {
+                    canContinue = false
+                    return Infinity
+                }
+                return cell[1].cellId
+            })(),
+            endingPoint: (() => {
+                const cell = gridCells.find(cell => cell[1].cellType === 'end')
+                if (cell === undefined) {
+                    canContinue = false
+                    return Infinity
+                }
+                return cell[1].cellId
+            })(),
+            unavailableCells: (() => {
+                let unavailableCells = gridCells
+                    .filter(cell => cell[1].cellType === 'close')
+                    .map(cell => cell[1].cellId)
+                return unavailableCells
+            })(),
+            rows: gridState.properties.rows,
+            columns: gridState.properties.columns,
+            size: gridState.properties.size,
+        }
+        if (!canContinue) return false
+        let visitedCells: { allTakedPath: Set<number>; shortestPath: Set<number> } = {
+            allTakedPath: new Set(),
+            shortestPath: new Set(),
+        }
+        switch (selectedAlgorithm) {
+            case 'dfs':
+                visitedCells.allTakedPath = dfs(algorithmFluff)
+                break
+            case 'bfs':
+                visitedCells.allTakedPath = bfs(algorithmFluff)
+                break
+            case 'dijkstra':
+                visitedCells = dijkstra(algorithmFluff)
+                break
+
+            default:
+                throw 'check runSelectionAlgorithm in App.tsx'
+        }
+        let intervalDelay = 1
+        visitedCells.shortestPath.forEach(cell => {
+            setTimeout(
+                () => dispatch({ type: 'changeCellVisitedStatusToTrue', payload: { cellId: cell } }),
+                100 * intervalDelay
+            )
+            intervalDelay++
+        })
+    }
     return (
         <Container sx={{ display: 'grid', justifyItems: 'center' }} onMouseMove={handleMouseMoveWhileLeftBtnPressed}>
+            {/* {showSnackbar && <Notification/>} */}
+            <Paper sx={{ backgroundColor: 'white' }}>
+                <RadioGroup row value={cursorClickActionMode} onChange={e => handleCursorClickSelection(e)}>
+                    <FormControlLabel label='open/close' value='open/close' name='selection' control={<Radio />} />
+                    <FormControlLabel label='start' value='start' name='selection' control={<Radio />} />
+                    <FormControlLabel label='end' value='end' name='selection' control={<Radio />} />
+                </RadioGroup>
+            </Paper>
+            <Paper sx={{ backgroundColor: 'white' }}>
+                <RadioGroup row value={selectedAlgorithm} onChange={e => handleAlgorithmSelection(e)}>
+                    <FormControlLabel label='BFS' value='bfs' name='selection' control={<Radio />} />
+                    <FormControlLabel label='DFS' value='dfs' name='selection' control={<Radio />} />
+                    <FormControlLabel label='dijkstra' value='dijkstra' name='selection' control={<Radio />} />
+                </RadioGroup>
+            </Paper>
             <Button onClick={e => dispatch({ type: 'hardResetAllGrid' })} variant='outlined' size='small'>
                 Hard Reset
             </Button>
-            <Button
-                onClick={e => {
-                    startSearch()
-                    dispatch({ type: 'resetVisitedCell' })
-                }}
-                variant='outlined'
-                size='small'
-            >
-                Run BFS Search
-            </Button>
-            <Paper
+            <div
                 style={{
                     display: 'grid',
                     gridTemplateRows: `repeat(${gridState.properties.rows}, 1fr)`,
                     gridTemplateColumns: `repeat(${gridState.properties.columns}, 1fr)`,
-                    width: 'fit-content',
-                    // marginInline: 'auto',
+                    gap: '0px',
+                    placeItems: 'flex-start',
+                    placeContent: 'space-around',
                 }}
             >
-                {cellSprings.map((cellProps, i) => (
+                {cellSprings.map((cellProps, i, cellApi) => (
                     <GridCell
                         key={i}
                         cellId={i}
                         cellProperties={gridState.cell[i]}
                         cellProps={cellProps}
                         dispatch={dispatch}
+                        cursorClickActionMode={cursorClickActionMode}
                         isMouseLeftButtonPressed={isMouseLeftButtonPressed}
                     />
                 ))}
-            </Paper>
-            Mouse Left Button : {isMouseLeftButtonPressed ? 'Held down' : 'Not pressed'}
-            <Button
-                onClick={() =>
-                    cellSpringsApi.start(i => {
-                        if (i === 2)
-                            return {
-                                opacity: 1,
-                                scale: 0.6,
-                            }
-                    })
-                }
-            >
-                Debugger
-            </Button>
+            </div>
+            <Button onClick={e => runSelectedAlgorithm(selectedAlgorithm)}>run Selected Algorithm</Button>
         </Container>
     )
 }

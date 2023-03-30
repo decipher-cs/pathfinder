@@ -1,51 +1,57 @@
-import { Grid, gridHelperFunctions } from '../App'
+import { AlgorithmFluff, Grid, gridHelperFunctions } from '../App'
 
-export const bfs = (grid: Grid, changeCellVisitedStatus: (id: number) => void, resetGlobalTimeoutTimer: () => void) => {
-    const gridSize = grid.properties.size
-    const startingPoint = gridHelperFunctions(grid).getStartingCellId()
-    const endingPoint = gridHelperFunctions(grid).getEndingCellId()
+export const bfs = (props: AlgorithmFluff) => {
+    const gridSize = props.size
+    const startingPoint = props.startingPoint
+    const endingPoint = props.endingPoint
     const visited: Set<number> = new Set()
     const q = []
     q.push(startingPoint)
-
     const neighbours = (cellId: number): number[] => {
-        const neighbours = []
-        const [row, col] = gridHelperFunctions(grid).cellIdToCoordinate(cellId)
-        neighbours.push(gridHelperFunctions(grid).coordinateToCellId([row - 1, col]))
-        neighbours.push(gridHelperFunctions(grid).coordinateToCellId([row, col + 1]))
-        neighbours.push(gridHelperFunctions(grid).coordinateToCellId([row + 1, col]))
-        neighbours.push(gridHelperFunctions(grid).coordinateToCellId([row, col - 1]))
+        const neighbours: number[] = []
+        const [row, col] = gridHelperFunctions.cellIdToCoordinate(cellId, props.columns)
+        if (row - 1 >= 0) {
+            neighbours.push(gridHelperFunctions.coordinateToCellId([row - 1, col], props.columns))
+        }
+        if (col + 1 <= props.columns - 1) {
+            neighbours.push(gridHelperFunctions.coordinateToCellId([row, col + 1], props.columns))
+        }
+        if (row + 1 <= props.rows - 1) {
+            neighbours.push(gridHelperFunctions.coordinateToCellId([row + 1, col], props.columns))
+        }
+        if (col - 1 >= 0) {
+            neighbours.push(gridHelperFunctions.coordinateToCellId([row, col - 1], props.columns))
+        }
         return neighbours
     }
     const cellIsValid = (cellId: number) => {
-        const [row, col] = gridHelperFunctions(grid).cellIdToCoordinate(cellId)
+        const [row, col] = gridHelperFunctions.cellIdToCoordinate(cellId, props.columns)
         if (
-            col >= grid.properties.columns ||
-            row >= grid.properties.rows ||
+            col > props.columns - 1 ||
+            row > props.rows - 1 ||
             col < 0 ||
             row < 0 ||
             visited.has(cellId) ||
-            grid.cell[cellId].cellType === 'close'
+            props.unavailableCells.includes(cellId)
         )
             return false
         return true
     }
-
     while (q.length >= 1) {
         let currCell = q.shift()
         if (currCell === undefined) break
-        if (cellIsValid(currCell) === true) {
-            changeCellVisitedStatus(currCell)
-            visited.add(currCell)
-            if (grid.cell[currCell].cellType === 'end') {
-                console.log('found', currCell, grid.cell[currCell].cellCoordinates)
-                return true
-            }
-            const nodes = neighbours(currCell)
-            for (let node of nodes) {
-                q.push(node)
+        if (currCell === endingPoint) {
+            break
+        }
+        visited.add(currCell)
+        const neighbouringCells = neighbours(currCell)
+        for (let cell of neighbouringCells) {
+            if (cellIsValid(cell) === true) {
+                q.push(cell)
             }
         }
     }
-    return false
+
+    visited.delete(startingPoint)
+    return visited
 }

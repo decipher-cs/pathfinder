@@ -1,36 +1,36 @@
-import { Grid } from '../App'
+import { AlgorithmFluff, gridHelperFunctions } from '../App'
 
-export const dfs = (
-    grid: Grid,
-    gridStartPoint: [number, number],
-    gridEndPoint: [number, number],
-    changeCellVisitedStatus: (id: number) => void,
-    resetGlobalTimeoutTimer: () => void
-) => {
+export const dfs = (props: AlgorithmFluff) => {
     const visited: Set<number> = new Set()
-    const gridSize = grid.properties.rows * grid.properties.columns
+    const gridSize = props.size
+    const endingCoordinates = gridHelperFunctions.cellIdToCoordinate(props.endingPoint, props.columns)
+    const startingCoordinates = gridHelperFunctions.cellIdToCoordinate(props.startingPoint, props.columns)
 
     const search = (currValueInCoordinates: [number, number]): boolean => {
         const [row, col] = currValueInCoordinates
-        const currCellId = grid.helperFunctions.coordinateToCellId([row, col])
+        const currCellId = gridHelperFunctions.coordinateToCellId([row, col], props.columns)
         if (
-            col >= grid.properties.columns ||
-            row >= grid.properties.rows ||
+            col >= props.columns ||
+            row >= props.rows ||
             col < 0 ||
             row < 0 ||
+            props.unavailableCells.includes(currCellId) ||
             visited.has(currCellId)
         )
             return false
-        if (grid.cell[currCellId]?.cellType === undefined || grid.cell[currCellId].cellType === 'close') {
-            visited.add(currCellId)
+        if (currCellId === undefined) {
+            console.log('currCellId unavaialbe in dfs. This should no be possible')
             return false
         }
-        if (grid.cell[currCellId].cellType === 'end') return true
+        if (currCellId === props.endingPoint) return true
+        // if (grid.cell[currCellId].cellType === 'end') return true
 
         visited.add(currCellId)
-        changeCellVisitedStatus(currCellId)
+        // changeCellVisitedStatus(currCellId)
         return search([row + 1, col]) || search([row - 1, col]) || search([row, col + 1]) || search([row, col - 1])
     }
-    resetGlobalTimeoutTimer()
-    return search(gridStartPoint)
+    const res = search(startingCoordinates)
+    console.log('result from dfs', res)
+    visited.delete(props.startingPoint)
+    return visited
 }
