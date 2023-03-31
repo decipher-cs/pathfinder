@@ -48,12 +48,18 @@ const getCellColor = (cellType: Cell['cellType'], isCellVisited: Cell['cellVisit
             return 'red'
     }
 }
+
 const AnimatedPaper = animated(Paper)
+
 const GridCell = (props: GridCellProps) => {
     const api = useSpringRef()
     const cellSpringStyle = useSpring({
         ref: api,
         from: { color: 'grey' },
+        to: {
+            backgroundColor: getCellColor(props.cellProperties.cellType, props.cellProperties.cellVisited),
+            scale: 1,
+        },
     })
     api.start(() => ({
         to: {
@@ -65,7 +71,7 @@ const GridCell = (props: GridCellProps) => {
     return (
         <>
             <animated.div
-                style={{ ...cellSpringStyle, padding: '0.4em'}}
+                style={{ ...cellSpringStyle, padding: '0.6em' }}
                 onMouseEnter={(e: React.MouseEvent) => {
                     props.isMouseLeftButtonPressed &&
                         props.dispatch({ type: 'flipCellOpenCloseStatus', payload: { cellId: props.cellId } })

@@ -12,8 +12,9 @@ function createWindow() {
         // }
     })
 
-    // win.loadFile('index.html')
-    win.loadURL('http://localhost:5173/')
+    // const url = app.isPackaged ? 'file://${path.join(__dirname, "./dist/index.html")}' : 'http://localhost:5173/'
+    // win.loadURL(url)
+    win.loadFile('./dist/index.html')
     win.webContents.openDevTools()
     win.webContents.on('context-menu', ()=>{
         contextMenu.popup()

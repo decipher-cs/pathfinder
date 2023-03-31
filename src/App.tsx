@@ -13,7 +13,9 @@ import {
     Snackbar,
     AlertProps,
     AlertColor,
+    ButtonGroup,
 } from '@mui/material'
+import './App.css'
 import { cloneDeep } from 'lodash'
 import { useEffect, useReducer, useRef, useState } from 'react'
 import './index.css'
@@ -90,35 +92,6 @@ export const gridHelperFunctions = {
     // getStartingCellCoordinates: () => grid.cell[getStartingCellId()].cellCoordinates,
     // getEndingCellCoordinates: () => grid.cell[getEndingCellId()].cellCoordinates,
 }
-// export const gridHelperFunctions = (grid: Grid) => {
-//     const { rows, columns, size } = grid.properties
-//     let coordinateToCellId = ([row, col]: [number, number]) => row * columns + col
-//     let cellIdToCoordinate = (id: number) => [Math.floor(id / columns), id % columns]
-//     let getEndingCellId = () => {
-//         for (const key in grid.cell) {
-//             if (grid.cell[key].cellType === 'end') return Number(key)
-//         }
-//         return Infinity
-//     }
-//     let getStartingCellId = () => {
-//         for (const key in grid.cell) {
-//             if (grid.cell[key].cellType === 'start') return Number(key)
-//         }
-//         return Infinity
-//     }
-//     let getStartingCellCoordinates = () => grid.cell[getStartingCellId()].cellCoordinates
-//
-//     let getEndingCellCoordinates = () => grid.cell[getEndingCellId()].cellCoordinates
-//
-//     return {
-//         coordinateToCellId,
-//         cellIdToCoordinate,
-//         getEndingCellId,
-//         getStartingCellId,
-//         getStartingCellCoordinates,
-//         getEndingCellCoordinates,
-//     }
-// }
 
 const gridConstructor = (m: number, n: number): Grid => {
     let grid: Grid = Object()
@@ -141,11 +114,12 @@ const gridConstructor = (m: number, n: number): Grid => {
     }
     grid.cell = cell
     cell[3].cellType = 'start'
-    cell[40].cellType = 'end'
+    cell[80].cellType = 'end'
     return grid
 }
 const globalRows = 10
 const globalColumns = 10
+const globalSize = globalRows * globalColumns
 
 let reducer = (grid: Grid, action: CellReducerActions): Grid => {
     let { type: actionType, payload: { cellId, newCellType, newCellVisitedStatus } = {} } = action
@@ -229,13 +203,13 @@ const App = (): JSX.Element => {
 
     const [selectedAlgorithm, setSelectedAlgorithm] = useState<Algorithm>('dijkstra')
 
-    const [cellSprings, cellSpringsApi] = useSprings(globalRows * globalColumns, index => ({
-        to: {
-            opacity: 1,
-            backgroundColor: 'white',
-        },
-        delay: index * 100,
-    }))
+    // const [cellSprings, cellSpringsApi] = useSprings(globalRows * globalColumns, index => ({
+    //     to: {
+    //         opacity: 1,
+    //         backgroundColor: 'white',
+    //     },
+    //     delay: index * 100,
+    // }))
 
     const [gridState, dispatch] = useReducer(reducer, gridConstructor(globalRows, globalColumns))
 
@@ -299,11 +273,12 @@ const App = (): JSX.Element => {
             columns: gridState.properties.columns,
             size: gridState.properties.size,
         }
-        if (!canContinue) return false
         let visitedCells: { allTakedPath: Set<number>; shortestPath: Set<number> } = {
             allTakedPath: new Set(),
             shortestPath: new Set(),
         }
+        if (!canContinue) return false
+
         switch (selectedAlgorithm) {
             case 'dfs':
                 visitedCells.allTakedPath = dfs(algorithmFluff)
@@ -318,46 +293,75 @@ const App = (): JSX.Element => {
             default:
                 throw 'check runSelectionAlgorithm in App.tsx'
         }
-        let intervalDelay = 1
-        visitedCells.shortestPath.forEach(cell => {
-            setTimeout(
-                () => dispatch({ type: 'changeCellVisitedStatusToTrue', payload: { cellId: cell } }),
-                100 * intervalDelay
-            )
-            intervalDelay++
-        })
+        animatePath(Object.values(visitedCells))
     }
+
+    const animatePath = async (groups: (number[] | Set<number>)[]) => {
+        for (const arr of groups[0]) {
+            await new Promise(res => {
+                setTimeout(() => {
+                    dispatch({ type: 'changeCellVisitedStatusToTrue', payload: { cellId: arr } })
+                    res('completed')
+                }, 100)
+            })
+        }
+        await new Promise(res => {
+            setTimeout(() => {
+                dispatch({ type: 'resetVisitedCell' })
+                res('completed')
+            }, 1000)
+        })
+        for (const arr of groups[1]) {
+            await new Promise(res => {
+                setTimeout(() => {
+                    dispatch({ type: 'changeCellVisitedStatusToTrue', payload: { cellId: arr } })
+                    res('completed')
+                }, 100)
+            })
+        }
+    }
+
     return (
         <Container sx={{ display: 'grid', justifyItems: 'center' }} onMouseMove={handleMouseMoveWhileLeftBtnPressed}>
             {/* {showSnackbar && <Notification/>} */}
-            <Paper sx={{ backgroundColor: 'white' }}>
+            <Paper sx={{ backgroundColor: 'white', p: 1 }}>
                 <RadioGroup row value={cursorClickActionMode} onChange={e => handleCursorClickSelection(e)}>
                     <FormControlLabel label='open/close' value='open/close' name='selection' control={<Radio />} />
                     <FormControlLabel label='start' value='start' name='selection' control={<Radio />} />
                     <FormControlLabel label='end' value='end' name='selection' control={<Radio />} />
                 </RadioGroup>
             </Paper>
-            <Paper sx={{ backgroundColor: 'white' }}>
+            <Paper sx={{ backgroundColor: 'white', p: 1 }}>
                 <RadioGroup row value={selectedAlgorithm} onChange={e => handleAlgorithmSelection(e)}>
                     <FormControlLabel label='BFS' value='bfs' name='selection' control={<Radio />} />
                     <FormControlLabel label='DFS' value='dfs' name='selection' control={<Radio />} />
                     <FormControlLabel label='dijkstra' value='dijkstra' name='selection' control={<Radio />} />
                 </RadioGroup>
             </Paper>
-            <Button onClick={e => dispatch({ type: 'hardResetAllGrid' })} variant='outlined' size='small'>
-                Hard Reset
-            </Button>
-            <div
-                style={{
+            <Paper sx={{ backgroundColor: 'white', p: 1 }}>
+                <ButtonGroup>
+                    <Button variant='outlined' size='small' onClick={e => runSelectedAlgorithm(selectedAlgorithm)}>
+                        Run
+                    </Button>
+                    <Button onClick={e => dispatch({ type: 'hardResetAllGrid' })} variant='outlined' size='small'>
+                        Hard Reset
+                    </Button>
+                </ButtonGroup>
+            </Paper>
+            <Box
+                className={'bg-transition'}
+                sx={{
                     display: 'grid',
                     gridTemplateRows: `repeat(${gridState.properties.rows}, 1fr)`,
                     gridTemplateColumns: `repeat(${gridState.properties.columns}, 1fr)`,
                     gap: '0px',
-                    placeItems: 'flex-start',
-                    placeContent: 'space-around',
+                    padding: '0.2em',
+                    placeItems: 'center',
+                    placeContent: 'center',
+                    // border: 'solid red 2px',
                 }}
             >
-                {cellSprings.map((cellProps, i, cellApi) => (
+                {new Array(globalSize).fill('').map((cellProps, i, cellApi) => (
                     <GridCell
                         key={i}
                         cellId={i}
@@ -368,8 +372,7 @@ const App = (): JSX.Element => {
                         isMouseLeftButtonPressed={isMouseLeftButtonPressed}
                     />
                 ))}
-            </div>
-            <Button onClick={e => runSelectedAlgorithm(selectedAlgorithm)}>run Selected Algorithm</Button>
+            </Box>
         </Container>
     )
 }
