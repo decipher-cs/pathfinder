@@ -1,30 +1,8 @@
 import { Paper } from '@mui/material'
-import {
-    CodeOffSharp as EndCellIcon,
-    CodeSharp as StartCellIcon,
-    CheckBoxSharp as CloseCellIcon,
-    CalendarViewWeekSharp,
-    CheckBoxOutlineBlankSharp as OpenCellIcon,
-    LensBlur,
-    Grain,
-    BlurCircular,
-    Circle,
-    Adjust,
-    AddOutlined,
-    StopRounded,
-    CropSquare,
-    CheckBoxRounded,
-    Square,
-    CheckBoxSharp,
-    DisabledByDefault,
-    IndeterminateCheckBoxSharp,
-    DisabledByDefaultSharp,
-    CropSquareSharp,
-    SquareSharp,
-} from '@mui/icons-material'
+import {} from '@mui/icons-material'
 import { CellReducerActions, Cell, CursorSelectionType } from '../App'
 import { animated, SpringRef, SpringValue, useSpring, useSpringRef } from '@react-spring/web'
-import { useRef } from 'react'
+import { memo, useRef } from 'react'
 
 interface GridCellProps {
     cellProperties: Cell
@@ -52,28 +30,28 @@ const getCellColor = (cellType: Cell['cellType'], isCellVisited: Cell['cellVisit
 const AnimatedPaper = animated(Paper)
 
 const GridCell = (props: GridCellProps) => {
-    const api = useSpringRef()
-    const cellSpringStyle = useSpring({
-        ref: api,
-        from: { color: 'grey' },
-        to: {
-            backgroundColor: getCellColor(props.cellProperties.cellType, props.cellProperties.cellVisited),
-            scale: 1,
-        },
-    })
-    api.start(() => ({
-        to: {
-            backgroundColor: getCellColor(props.cellProperties.cellType, props.cellProperties.cellVisited),
-            scale: props.cellProperties.cellVisited ? 0.5 : 1,
-            // rotate: props.cellProperties.cellVisited ? '405deg' : '0deg',
-        },
-    }))
+    // const [cellSpringStyle, api] = useSpring(() => ({
+    //     to: {
+    //         backgroundColor: getCellColor(props.cellProperties.cellType, props.cellProperties.cellVisited),
+    //         scale: 1,
+    //     },
+    // }))
+    // api.start({
+    //     to: {
+    //         backgroundColor: getCellColor(props.cellProperties.cellType, props.cellProperties.cellVisited),
+    //         scale: props.cellProperties.cellVisited ? 0.5 : 1,
+    //     },
+    // })
     return (
         <>
             <animated.div
-                style={{ ...cellSpringStyle, padding: '0.6em' }}
+                style={{
+                    backgroundColor: getCellColor(props.cellProperties.cellType, props.cellProperties.cellVisited),
+                    padding: '0.6em',
+                }}
+                // style={{ ...cellSpringStyle, padding: '0.3em' }}
                 onMouseEnter={(e: React.MouseEvent) => {
-                    props.isMouseLeftButtonPressed &&
+                    if (props.isMouseLeftButtonPressed)
                         props.dispatch({ type: 'flipCellOpenCloseStatus', payload: { cellId: props.cellId } })
                 }}
                 onClick={(e: React.MouseEvent) => {
@@ -93,26 +71,9 @@ const GridCell = (props: GridCellProps) => {
                     }
                 }}
             >
-                {/* {(() => { */}
-                {/*     // return <div>a</div> */}
-                {/*     return <SquareSharp fontSize='small' /> */}
-                {/*     if (props.cellProperties.cellVisited === true) return <CheckBoxSharp /> */}
-                {/*     switch (props.cellProperties.cellType) { */}
-                {/*         case 'open': */}
-                {/*             return <SquareSharp /> */}
-                {/*         case 'close': */}
-                {/*             return <SquareSharp /> */}
-                {/*         case 'start': */}
-                {/*             return <IndeterminateCheckBoxSharp /> */}
-                {/*         case 'end': */}
-                {/*             return <DisabledByDefaultSharp /> */}
-                {/*         default: */}
-                {/*             return <CheckBoxSharp /> */}
-                {/*     } */}
-                {/* })()} */}
             </animated.div>
         </>
     )
 }
 
-export default GridCell
+export default memo(GridCell)

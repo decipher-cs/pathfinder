@@ -63,7 +63,11 @@ export const dijkstra = (props: AlgorithmFluff) => {
 
     while (unexplored.size > 0) {
         const exploringCell = getUnexploredCellWithLeastDist().cell
-        if (exploringCell === undefined) throw "No unexplored cell defined in dijkstra's algorithn"
+        if (exploringCell === undefined) {
+            console.log('nothing found in dijkstra')
+            break
+        }
+
         visited.add(exploringCell)
 
         if (exploringCell === endingCellId) {

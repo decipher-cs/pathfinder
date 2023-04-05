@@ -14,10 +14,14 @@ import {
     AlertProps,
     AlertColor,
     ButtonGroup,
+    Input,
+    Slider,
+    TextField,
+    Typography,
 } from '@mui/material'
 import './App.css'
 import { cloneDeep } from 'lodash'
-import { useEffect, useReducer, useRef, useState } from 'react'
+import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import './index.css'
 import GridCell from './components/GridCell'
 import { dfs } from './pathfindingAlgorithms/dfs'
@@ -77,20 +81,19 @@ export type CellReducerActions = {
         | 'resetVisitedCell'
         | 'changeCellTypeToStart'
         | 'changeCellTypeToEnd'
+        | 'reinitGrid'
     payload?: {
-        cellId: number // This is the id that corresponds to cellCoordinates. Ex. <0,0> = id: 0, <0,1> = id: 1 ...
+        cellId?: number // This is the id that corresponds to cellCoordinates. Ex. <0,0> = id: 0, <0,1> = id: 1 ...
         newCellType?: CellType
         newCellVisitedStatus?: boolean
+        newGridSize?: number
     }
 }
 
+// Algorithms like dfs, bfs make use of these functions
 export const gridHelperFunctions = {
     coordinateToCellId: ([row, col]: [number, number], columns: number) => row * columns + col,
     cellIdToCoordinate: (id: number, columns: number): [number, number] => [Math.floor(id / columns), id % columns],
-    // getEndingCellId: () => {},
-    // getStartingCellId: () => {},
-    // getStartingCellCoordinates: () => grid.cell[getStartingCellId()].cellCoordinates,
-    // getEndingCellCoordinates: () => grid.cell[getEndingCellId()].cellCoordinates,
 }
 
 const gridConstructor = (m: number, n: number): Grid => {
@@ -113,16 +116,18 @@ const gridConstructor = (m: number, n: number): Grid => {
         }
     }
     grid.cell = cell
-    cell[3].cellType = 'start'
-    cell[80].cellType = 'end'
+
+    // initialize grid with a random start and end points
+    const randomStartCell = Math.floor(Math.random() * m * n)
+    const randomEndCell = Math.floor(Math.random() * m * n)
+    cell[randomStartCell].cellType = 'start'
+    cell[randomEndCell].cellType = 'end'
+
     return grid
 }
-const globalRows = 10
-const globalColumns = 10
-const globalSize = globalRows * globalColumns
 
 let reducer = (grid: Grid, action: CellReducerActions): Grid => {
-    let { type: actionType, payload: { cellId, newCellType, newCellVisitedStatus } = {} } = action
+    let { type: actionType, payload: { cellId, newCellType, newCellVisitedStatus, newGridSize } = {} } = action
     let clonedGrid = cloneDeep(grid)
     switch (actionType) {
         case 'changeCellTypeToStart':
@@ -179,6 +184,12 @@ let reducer = (grid: Grid, action: CellReducerActions): Grid => {
             if (cellId === undefined) break
             clonedGrid.cell[cellId].cellVisited = true
             break
+        case 'reinitGrid':
+            if (newGridSize === undefined) break
+            clonedGrid.properties.rows = newGridSize
+            clonedGrid.properties.columns = newGridSize
+            clonedGrid.properties.size = newGridSize * newGridSize
+            break
 
         default:
             break
@@ -186,16 +197,11 @@ let reducer = (grid: Grid, action: CellReducerActions): Grid => {
     return clonedGrid
 }
 
-// const Notification = (props: { severity: AlertColor; autoHide?: number; showSnackbar: boolean }) => {
-//     return (
-//         <Snackbar autoHideDuration={props.autoHide || 6000} open={props.showSnackbar}>
-//             <Alert severity={props.severity} onClose={}>fasdas</Alert>
-//         </Snackbar>
-//     )
-// }
+const INITIAL_GRID_SIZE = 20
+const MAX_GRID_SIZE = 20
 
 const App = (): JSX.Element => {
-    // const [showSnackbar, setShowSnackbar] = useState(true)
+    const [gridSize, setGridSize] = useState<number>(INITIAL_GRID_SIZE)
 
     const [isMouseLeftButtonPressed, setIsMouseLeftButtonPressed] = useState(false)
 
@@ -203,23 +209,21 @@ const App = (): JSX.Element => {
 
     const [selectedAlgorithm, setSelectedAlgorithm] = useState<Algorithm>('dijkstra')
 
-    // const [cellSprings, cellSpringsApi] = useSprings(globalRows * globalColumns, index => ({
-    //     to: {
-    //         opacity: 1,
-    //         backgroundColor: 'white',
-    //     },
-    //     delay: index * 100,
-    // }))
+    const sliderValue = useRef(INITIAL_GRID_SIZE)
 
-    const [gridState, dispatch] = useReducer(reducer, gridConstructor(globalRows, globalColumns))
+    const [gridState, dispatch] = useReducer(reducer, gridConstructor(gridSize, gridSize))
 
     const handleMouseMoveWhileLeftBtnPressed = (event: React.MouseEvent<HTMLDivElement>) => {
         if (event.buttons === 1) {
             setIsMouseLeftButtonPressed(true)
-            // setCursorClickActionMode('open')
         } else {
             setIsMouseLeftButtonPressed(false)
         }
+    }
+
+    const handleGridSizeChange = (newGridSize: number) => {
+        setGridSize(newGridSize)
+        dispatch({ type: 'reinitGrid', payload: { newGridSize } })
     }
 
     const handleCursorClickSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -302,7 +306,7 @@ const App = (): JSX.Element => {
                 setTimeout(() => {
                     dispatch({ type: 'changeCellVisitedStatusToTrue', payload: { cellId: arr } })
                     res('completed')
-                }, 100)
+                }, 0)
             })
         }
         await new Promise(res => {
@@ -316,64 +320,119 @@ const App = (): JSX.Element => {
                 setTimeout(() => {
                     dispatch({ type: 'changeCellVisitedStatusToTrue', payload: { cellId: arr } })
                     res('completed')
-                }, 100)
+                }, 0)
             })
         }
+        await new Promise(res => {
+            setTimeout(() => {
+                dispatch({ type: 'resetVisitedCell' })
+                res('completed')
+            }, 1000)
+        })
     }
 
     return (
-        <Container sx={{ display: 'grid', justifyItems: 'center' }} onMouseMove={handleMouseMoveWhileLeftBtnPressed}>
-            {/* {showSnackbar && <Notification/>} */}
-            <Paper sx={{ backgroundColor: 'white', p: 1 }}>
-                <RadioGroup row value={cursorClickActionMode} onChange={e => handleCursorClickSelection(e)}>
-                    <FormControlLabel label='open/close' value='open/close' name='selection' control={<Radio />} />
-                    <FormControlLabel label='start' value='start' name='selection' control={<Radio />} />
-                    <FormControlLabel label='end' value='end' name='selection' control={<Radio />} />
-                </RadioGroup>
-            </Paper>
-            <Paper sx={{ backgroundColor: 'white', p: 1 }}>
-                <RadioGroup row value={selectedAlgorithm} onChange={e => handleAlgorithmSelection(e)}>
-                    <FormControlLabel label='BFS' value='bfs' name='selection' control={<Radio />} />
-                    <FormControlLabel label='DFS' value='dfs' name='selection' control={<Radio />} />
-                    <FormControlLabel label='dijkstra' value='dijkstra' name='selection' control={<Radio />} />
-                </RadioGroup>
-            </Paper>
-            <Paper sx={{ backgroundColor: 'white', p: 1 }}>
-                <ButtonGroup>
-                    <Button variant='outlined' size='small' onClick={e => runSelectedAlgorithm(selectedAlgorithm)}>
-                        Run
-                    </Button>
-                    <Button onClick={e => dispatch({ type: 'hardResetAllGrid' })} variant='outlined' size='small'>
-                        Hard Reset
-                    </Button>
-                </ButtonGroup>
-            </Paper>
-            <Box
-                className={'bg-transition'}
+        <Box>
+            <Container
                 sx={{
-                    display: 'grid',
-                    gridTemplateRows: `repeat(${gridState.properties.rows}, 1fr)`,
-                    gridTemplateColumns: `repeat(${gridState.properties.columns}, 1fr)`,
-                    gap: '0px',
-                    padding: '0.2em',
-                    placeItems: 'center',
-                    placeContent: 'center',
-                    // border: 'solid red 2px',
+                    display: 'flex',
+                    gap: '0.3em',
+                    backgroundColor: 'grey',
+                    flexWrap: 'wrap',
+                    justifyContent: 'center',
                 }}
             >
-                {new Array(globalSize).fill('').map((cellProps, i, cellApi) => (
-                    <GridCell
-                        key={i}
-                        cellId={i}
-                        cellProperties={gridState.cell[i]}
-                        cellProps={cellProps}
-                        dispatch={dispatch}
-                        cursorClickActionMode={cursorClickActionMode}
-                        isMouseLeftButtonPressed={isMouseLeftButtonPressed}
+                <Paper sx={{ backgroundColor: 'white', p: 1 }}>
+                    <Typography> Grid Size </Typography>
+                    <Slider
+                        defaultValue={INITIAL_GRID_SIZE}
+                        step={5}
+                        marks
+                        min={5}
+                        max={MAX_GRID_SIZE}
+                        onChange={(e: any) => (sliderValue.current = e.target.value)}
                     />
-                ))}
-            </Box>
-        </Container>
+                    {/* <Button variant='outlined' size='small' onClick={()=>console.log(sliderValue.current)}> */}
+                    <Button variant='outlined' size='small' onClick={() => handleGridSizeChange(sliderValue.current)}>
+                        Recreate Grid
+                    </Button>
+                </Paper>
+
+                <Paper sx={{ backgroundColor: 'white', p: 1 }}>
+                    <Typography> Click Action Type </Typography>
+                    <RadioGroup row value={cursorClickActionMode} onChange={e => handleCursorClickSelection(e)}>
+                        <FormControlLabel label='open/close' value='open/close' name='selection' control={<Radio />} />
+                        <FormControlLabel label='start' value='start' name='selection' control={<Radio />} />
+                        <FormControlLabel label='end' value='end' name='selection' control={<Radio />} />
+                    </RadioGroup>
+                </Paper>
+
+                <Paper sx={{ backgroundColor: 'white', p: 1 }}>
+                    <Typography> Algorithm Type </Typography>
+                    <RadioGroup row value={selectedAlgorithm} onChange={e => handleAlgorithmSelection(e)}>
+                        <FormControlLabel label='BFS' value='bfs' name='selection' control={<Radio />} />
+                        <FormControlLabel label='DFS' value='dfs' name='selection' control={<Radio />} />
+                        <FormControlLabel label='dijkstra' value='dijkstra' name='selection' control={<Radio />} />
+                    </RadioGroup>
+                </Paper>
+
+                <Paper sx={{ backgroundColor: 'white', p: 1 }}>
+                    <ButtonGroup>
+                        <Button variant='outlined' size='small' onClick={e => runSelectedAlgorithm(selectedAlgorithm)}>
+                            Run
+                        </Button>
+                        <Button onClick={e => dispatch({ type: 'hardResetAllGrid' })} variant='outlined' size='small'>
+                            Reset Entire Grid
+                        </Button>
+                        <Button onClick={e => dispatch({ type: 'resetVisitedCell' })} variant='outlined' size='small'>
+                            Reset visited cells
+                        </Button>
+                        <Button
+                            onClick={e => console.log('TODO: saving layout currently not supported')}
+                            variant='outlined'
+                            size='small'
+                        >
+                            Save Current Layout
+                        </Button>
+                    </ButtonGroup>
+                </Paper>
+            </Container>
+
+            <Container
+                sx={{ display: 'grid', justifyItems: 'center' }}
+                onMouseMove={handleMouseMoveWhileLeftBtnPressed}
+            >
+                <Box
+                    className={'bg-transition'}
+                    sx={{
+                        display: 'grid',
+                        gridTemplateRows: `repeat(${gridSize}, 1fr)`,
+                        gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
+                        padding: '0.2em',
+                    }}
+                >
+                    {new Array(gridSize * gridSize).fill('').map((cellProps, i, cellApi) => (
+                        <GridCell
+                            key={i}
+                            cellId={i}
+                            cellProperties={gridState.cell[i]}
+                            cellProps={cellProps}
+                            dispatch={dispatch}
+                            cursorClickActionMode={cursorClickActionMode}
+                            isMouseLeftButtonPressed={isMouseLeftButtonPressed}
+                        />
+                    ))}
+                </Box>
+            </Container>
+            <Button
+                onClick={() => {
+                    console.log(gridSize)
+                    console.log(gridState.properties)
+                }}
+            >
+                degubber
+            </Button>
+        </Box>
     )
 }
 
