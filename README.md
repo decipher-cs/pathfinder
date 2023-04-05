@@ -1,4 +1,6 @@
 See [Maze-solving algorithms](https://en.wikipedia.org/wiki/Maze-solving_algorithm)
+## Demo
+![demo gif](./public/pathfinder.gif)
 
 ## Things I learned
 
