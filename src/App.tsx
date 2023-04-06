@@ -18,6 +18,7 @@ import {
     Slider,
     TextField,
     Typography,
+    useMediaQuery,
 } from '@mui/material'
 import './App.css'
 import { cloneDeep } from 'lodash'
@@ -25,7 +26,16 @@ import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import './index.css'
 import GridCell from './components/GridCell'
 import { dfs } from './pathfindingAlgorithms/dfs'
-import { animated, SpringProps, SpringRef, SpringValue, useSpring, useSprings, useSpringValue } from '@react-spring/web'
+import {
+    animated,
+    ForwardProps,
+    SpringProps,
+    SpringRef,
+    SpringValue,
+    useSpring,
+    useSprings,
+    useSpringValue,
+} from '@react-spring/web'
 import { bfs } from './pathfindingAlgorithms/bfs'
 import { dijkstra } from './pathfindingAlgorithms/dijkstra'
 
@@ -41,15 +51,6 @@ export interface Cell {
     cellType: CellType
     cellVisited: boolean
 }
-
-// export interface GridHelperFuntions {
-//     coordinateToCellId: ([row, col]: [number, number]) => number
-//     cellIdToCoordinate: (cellId: number) => [number, number]
-//     getStartingCellId: any
-//     getEndingCellId: () => Cell['cellId']
-//     getStartingCellCoordinates: () => [number, number] | number
-//     getEndingCellCoordinates: () => [number, number] | number
-// }
 
 export interface AlgorithmFluff {
     startingPoint: number
@@ -197,6 +198,10 @@ let reducer = (grid: Grid, action: CellReducerActions): Grid => {
     return clonedGrid
 }
 
+const PaperWithDefaults = (props: { children: React.ReactNode }) => {
+    return <Paper sx={{ p: 3 }}>{props.children}</Paper>
+}
+
 const INITIAL_GRID_SIZE = 20
 const MAX_GRID_SIZE = 20
 
@@ -332,17 +337,17 @@ const App = (): JSX.Element => {
     }
 
     return (
-        <Box>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap' }} p={2}>
             <Container
                 sx={{
                     display: 'flex',
-                    gap: '0.3em',
-                    backgroundColor: 'grey',
+                    gap: 1.4,
                     flexWrap: 'wrap',
-                    justifyContent: 'center',
+                    width: 'fit-content',
+                    placeContent: 'center',
                 }}
             >
-                <Paper sx={{ backgroundColor: 'white', p: 1 }}>
+                <PaperWithDefaults>
                     <Typography> Grid Size </Typography>
                     <Slider
                         defaultValue={INITIAL_GRID_SIZE}
@@ -356,27 +361,27 @@ const App = (): JSX.Element => {
                     <Button variant='outlined' size='small' onClick={() => handleGridSizeChange(sliderValue.current)}>
                         Recreate Grid
                     </Button>
-                </Paper>
+                </PaperWithDefaults>
 
-                <Paper sx={{ backgroundColor: 'white', p: 1 }}>
+                <PaperWithDefaults>
                     <Typography> Click Action Type </Typography>
                     <RadioGroup row value={cursorClickActionMode} onChange={e => handleCursorClickSelection(e)}>
                         <FormControlLabel label='open/close' value='open/close' name='selection' control={<Radio />} />
                         <FormControlLabel label='start' value='start' name='selection' control={<Radio />} />
                         <FormControlLabel label='end' value='end' name='selection' control={<Radio />} />
                     </RadioGroup>
-                </Paper>
+                </PaperWithDefaults>
 
-                <Paper sx={{ backgroundColor: 'white', p: 1 }}>
+                <PaperWithDefaults>
                     <Typography> Algorithm Type </Typography>
                     <RadioGroup row value={selectedAlgorithm} onChange={e => handleAlgorithmSelection(e)}>
                         <FormControlLabel label='BFS' value='bfs' name='selection' control={<Radio />} />
                         <FormControlLabel label='DFS' value='dfs' name='selection' control={<Radio />} />
                         <FormControlLabel label='dijkstra' value='dijkstra' name='selection' control={<Radio />} />
                     </RadioGroup>
-                </Paper>
+                </PaperWithDefaults>
 
-                <Paper sx={{ backgroundColor: 'white', p: 1 }}>
+                <PaperWithDefaults>
                     <ButtonGroup>
                         <Button variant='outlined' size='small' onClick={e => runSelectedAlgorithm(selectedAlgorithm)}>
                             Run
@@ -395,11 +400,11 @@ const App = (): JSX.Element => {
                             Save Current Layout
                         </Button>
                     </ButtonGroup>
-                </Paper>
+                </PaperWithDefaults>
             </Container>
 
             <Container
-                sx={{ display: 'grid', justifyItems: 'center' }}
+                sx={{ display: 'grid', placeItems: 'center', placeContent: 'center', width: 'min-content' }}
                 onMouseMove={handleMouseMoveWhileLeftBtnPressed}
             >
                 <Box
@@ -424,14 +429,6 @@ const App = (): JSX.Element => {
                     ))}
                 </Box>
             </Container>
-            <Button
-                onClick={() => {
-                    console.log(gridSize)
-                    console.log(gridState.properties)
-                }}
-            >
-                degubber
-            </Button>
         </Box>
     )
 }
