@@ -44,6 +44,7 @@ Drag your cursor on the grid to place walls which cannot be crossed by the algor
 See [Maze-solving algorithms on wikipedia](https://en.wikipedia.org/wiki/Maze-solving_algorithm)
 [Spanning Tree Youtube channel - Dijkstra's algorithm](https://www.youtube.com/watch?v=EFg3u_E6eHU)
 [Texicab Geometry](https://en.wikipedia.org/wiki/Taxicab_geometry)
+[Astar search algorithm](https://briangrinstead.com/blog/astar-search-algorithm-in-javascript/)
 
 ## License
 
