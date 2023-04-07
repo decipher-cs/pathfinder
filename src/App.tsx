@@ -38,6 +38,7 @@ import {
 } from '@react-spring/web'
 import { bfs } from './pathfindingAlgorithms/bfs'
 import { dijkstra } from './pathfindingAlgorithms/dijkstra'
+import { astart } from './pathfindingAlgorithms/astar'
 
 export type CellType = 'open' | 'close' | 'start' | 'end'
 
@@ -52,7 +53,7 @@ export interface Cell {
     cellVisited: boolean
 }
 
-export interface AlgorithmFluff {
+export interface AlgorithmArgs {
     startingPoint: number
     endingPoint: number
     unavailableCells: number[]
@@ -60,6 +61,13 @@ export interface AlgorithmFluff {
     columns: number
     size: number
 }
+
+export interface AlgorithmRetrunValue {
+    allTakedPath: Set<number> | number[]
+    shortestPath?: Set<number> | number[]
+}
+
+export type SomeFunction = (arg: AlgorithmArgs) => AlgorithmRetrunValue
 
 export interface GridProperties {
     rows: number
@@ -212,7 +220,7 @@ const App = (): JSX.Element => {
 
     const [cursorClickActionMode, setCursorClickActionMode] = useState<CursorSelectionType>('open/close')
 
-    const [selectedAlgorithm, setSelectedAlgorithm] = useState<Algorithm>('dijkstra')
+    const [selectedAlgorithm, setSelectedAlgorithm] = useState<Algorithm>('astar')
 
     const sliderValue = useRef(INITIAL_GRID_SIZE)
 
@@ -253,9 +261,9 @@ const App = (): JSX.Element => {
         const gridCells = Object.entries(gridState.cell)
         let canContinue: boolean = true
 
-        // put snackbar here
         dispatch({ type: 'resetVisitedCell' })
-        const algorithmFluff: AlgorithmFluff = {
+
+        const algorithmArgs: AlgorithmArgs = {
             startingPoint: (() => {
                 const cell = gridCells.find(cell => cell[1].cellType === 'start')
                 if (cell === undefined) {
@@ -282,21 +290,23 @@ const App = (): JSX.Element => {
             columns: gridState.properties.columns,
             size: gridState.properties.size,
         }
-        let visitedCells: { allTakedPath: Set<number>; shortestPath: Set<number> } = {
-            allTakedPath: new Set(),
-            shortestPath: new Set(),
-        }
+
+        let visitedCells: AlgorithmRetrunValue
+
         if (!canContinue) return false
 
         switch (selectedAlgorithm) {
             case 'dfs':
-                visitedCells.allTakedPath = dfs(algorithmFluff)
+                visitedCells = dfs(algorithmArgs)
                 break
             case 'bfs':
-                visitedCells.allTakedPath = bfs(algorithmFluff)
+                visitedCells = bfs(algorithmArgs)
                 break
             case 'dijkstra':
-                visitedCells = dijkstra(algorithmFluff)
+                visitedCells = dijkstra(algorithmArgs)
+                break
+            case 'astar':
+                visitedCells = astart(algorithmArgs)
                 break
 
             default:
@@ -337,7 +347,7 @@ const App = (): JSX.Element => {
     }
 
     return (
-        <Box sx={{ display: 'flex', flexWrap: 'wrap' }} p={2}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }} p={2}>
             <Container
                 sx={{
                     display: 'flex',
@@ -377,15 +387,13 @@ const App = (): JSX.Element => {
                     <RadioGroup row value={selectedAlgorithm} onChange={e => handleAlgorithmSelection(e)}>
                         <FormControlLabel label='BFS' value='bfs' name='selection' control={<Radio />} />
                         <FormControlLabel label='DFS' value='dfs' name='selection' control={<Radio />} />
-                        <FormControlLabel label='dijkstra' value='dijkstra' name='selection' control={<Radio />} />
+                        <FormControlLabel label='Dijkstra' value='dijkstra' name='selection' control={<Radio />} />
+                        <FormControlLabel label='Astar' value='astar' name='selection' control={<Radio />} />
                     </RadioGroup>
                 </PaperWithDefaults>
 
                 <PaperWithDefaults>
                     <ButtonGroup>
-                        <Button variant='outlined' size='small' onClick={e => runSelectedAlgorithm(selectedAlgorithm)}>
-                            Run
-                        </Button>
                         <Button onClick={e => dispatch({ type: 'hardResetAllGrid' })} variant='outlined' size='small'>
                             Reset Entire Grid
                         </Button>
@@ -401,6 +409,11 @@ const App = (): JSX.Element => {
                         </Button>
                     </ButtonGroup>
                 </PaperWithDefaults>
+                <PaperWithDefaults>
+                    <Button variant='contained' size='small' onClick={e => runSelectedAlgorithm(selectedAlgorithm)}>
+                        Run
+                    </Button>
+                </PaperWithDefaults>
             </Container>
 
             <Container
@@ -413,7 +426,8 @@ const App = (): JSX.Element => {
                         display: 'grid',
                         gridTemplateRows: `repeat(${gridSize}, 1fr)`,
                         gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
-                        padding: '0.2em',
+                        padding: '0.4em',
+                        gap: 0.5,
                     }}
                 >
                     {new Array(gridSize * gridSize).fill('').map((cellProps, i, cellApi) => (

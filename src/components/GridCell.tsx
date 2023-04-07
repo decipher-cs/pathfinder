@@ -17,13 +17,13 @@ const getCellColor = (cellType: Cell['cellType'], isCellVisited: Cell['cellVisit
     if (isCellVisited === true) return 'cyan'
     switch (cellType) {
         case 'open':
-            return 'grey'
+            return 'white'
         case 'close':
-            return 'blue'
+            return 'black'
         case 'start':
-            return 'green'
+            return '#23a6d5'
         case 'end':
-            return 'red'
+            return '#ee7752'
     }
 }
 

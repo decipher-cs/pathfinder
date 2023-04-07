@@ -1,6 +1,6 @@
-import { AlgorithmFluff, gridHelperFunctions } from '../App'
+import { AlgorithmArgs, AlgorithmRetrunValue, gridHelperFunctions } from '../App'
 
-export const dfs = (props: AlgorithmFluff) => {
+export const dfs = (props: AlgorithmArgs): AlgorithmRetrunValue => {
     const visited: Set<number> = new Set()
     const gridSize = props.size
     const endingCoordinates = gridHelperFunctions.cellIdToCoordinate(props.endingPoint, props.columns)
@@ -32,5 +32,5 @@ export const dfs = (props: AlgorithmFluff) => {
     const res = search(startingCoordinates)
     console.log('result from dfs', res)
     visited.delete(props.startingPoint)
-    return visited
+    return { allTakedPath: visited }
 }

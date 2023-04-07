@@ -1,6 +1,6 @@
-import { AlgorithmFluff, gridHelperFunctions } from '../App'
+import { AlgorithmArgs, AlgorithmRetrunValue, gridHelperFunctions } from '../App'
 
-export const dijkstra = (props: AlgorithmFluff) => {
+export const dijkstra = (props: AlgorithmArgs): AlgorithmRetrunValue => {
     const gridSize = props.size
     const startingCellId = props.startingPoint
     const endingCellId = props.endingPoint

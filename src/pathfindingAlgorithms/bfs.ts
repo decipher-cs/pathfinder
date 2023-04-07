@@ -1,6 +1,6 @@
-import { AlgorithmFluff, Grid, gridHelperFunctions } from '../App'
+import { AlgorithmArgs, AlgorithmRetrunValue, gridHelperFunctions } from '../App'
 
-export const bfs = (props: AlgorithmFluff) => {
+export const bfs = (props: AlgorithmArgs): AlgorithmRetrunValue => {
     const gridSize = props.size
     const startingPoint = props.startingPoint
     const endingPoint = props.endingPoint
@@ -53,5 +53,5 @@ export const bfs = (props: AlgorithmFluff) => {
     }
 
     visited.delete(startingPoint)
-    return visited
+    return { allTakedPath: visited }
 }
