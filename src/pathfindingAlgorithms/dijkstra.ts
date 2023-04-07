@@ -91,11 +91,12 @@ export const dijkstra = (props: AlgorithmArgs): AlgorithmRetrunValue => {
     }
 
     const getShortestPath = () => {
-        let currCell = prevExploredCell.get(endingCellId) as number
+        let currCell = prevExploredCell.get(endingCellId) 
 
         while (currCell !== startingCellId) {
+            if (currCell === undefined) break
             shortestPath.add(currCell)
-            currCell = prevExploredCell.get(currCell) as number
+            currCell = prevExploredCell.get(currCell) 
         }
     }
 

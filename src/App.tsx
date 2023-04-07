@@ -207,7 +207,7 @@ let reducer = (grid: Grid, action: CellReducerActions): Grid => {
 }
 
 const PaperWithDefaults = (props: { children: React.ReactNode }) => {
-    return <Paper sx={{ p: 3 }}>{props.children}</Paper>
+    return <Paper sx={{ p: 2 }}>{props.children}</Paper>
 }
 
 const INITIAL_GRID_SIZE = 20
@@ -316,12 +316,13 @@ const App = (): JSX.Element => {
     }
 
     const animatePath = async (groups: (number[] | Set<number>)[]) => {
+
         for (const arr of groups[0]) {
             await new Promise(res => {
                 setTimeout(() => {
                     dispatch({ type: 'changeCellVisitedStatusToTrue', payload: { cellId: arr } })
                     res('completed')
-                }, 0)
+                }, 10)
             })
         }
         await new Promise(res => {

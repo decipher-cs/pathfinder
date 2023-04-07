@@ -7,7 +7,9 @@ export const astart = (props: AlgorithmArgs): AlgorithmRetrunValue => {
     const [endingCellRow, endingCellColumn] = gridHelperFunctions.cellIdToCoordinate(endingCellId, props.columns)
     const walls = props.unavailableCells
 
-    const fCost: Map<number, number> = new Map()
+    const shortestPath: Set<number> = new Set()
+    const parentNodes = new Map<number, number>()
+
     // f= g+h, h= heuristic cost, g=cost from starting node to current node
     const cost: Map<number, { f: number; g: number; h: number }> = new Map()
     const explored: Set<number> = new Set()
@@ -94,22 +96,36 @@ export const astart = (props: AlgorithmArgs): AlgorithmRetrunValue => {
             if (nCost === undefined) throw 'check astart. this should not be possible'
             let { f: nf, g: ng, h: nh } = nCost
 
-            if (!unexplored.has(neighbour)) {
-                unexplored.add(neighbour)
+            if (cg + 1 < ng || !unexplored.has(neighbour)) {
+                parentNodes.set(neighbour, currCell)
+
                 nh = getHeuristic(neighbour)
                 ng = cg + 1
                 nf = nh + ng
                 cost.set(neighbour, { g: ng, h: nh, f: nf })
-            } else if (cg + 1 < ng) {
-                ng = cg + 1
-                nf = nh + ng
-                cost.set(neighbour, { g: ng, h: nh, f: nf })
+
+                if (!unexplored.has(neighbour)) {
+                    unexplored.add(neighbour)
+                }
             }
         }
     }
 
+    const getShortestPath = () => {
+        let currCell = parentNodes.get(endingCellId)
+
+        while (currCell !== startingCellId) {
+            if (currCell === undefined) break
+            shortestPath.add(currCell)
+            currCell = parentNodes.get(currCell)
+        }
+    }
+
     explored.delete(startingCellId)
+    getShortestPath()
+
     return {
         allTakedPath: explored,
+        shortestPath: shortestPath,
     }
 }
