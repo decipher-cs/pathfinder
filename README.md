@@ -10,7 +10,7 @@ Visialise various pathfinding algorithms
 
 ## Demo
 
-![demo gif](./public/pathfinder.gif)
+![demo gif](./public/trailblazer.gif)
 
 ## Table of Contents (Optional)
 
