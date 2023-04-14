@@ -214,6 +214,8 @@ const INITIAL_GRID_SIZE = 20
 const MAX_GRID_SIZE = 20
 
 const App = (): JSX.Element => {
+    const animationQueue = useRef<number[][]>([])
+
     const [gridSize, setGridSize] = useState<number>(INITIAL_GRID_SIZE)
 
     const [isMouseLeftButtonPressed, setIsMouseLeftButtonPressed] = useState(false)
@@ -315,36 +317,57 @@ const App = (): JSX.Element => {
         animatePath(Object.values(visitedCells))
     }
 
-    const animatePath = async (groups: (number[] | Set<number>)[]) => {
+    // If there are any ongoing animations, terminate them.
+    const clearAnimationQueue = () => {
+        const queue = animationQueue.current
+        queue.forEach(animation => {
+            animation.forEach(timeoutId => {
+                clearTimeout(timeoutId)
+            })
+        })
+    }
 
-        for (const arr of groups[0]) {
-            await new Promise(res => {
+    // It will animate the path that was search follewed by the shortest path that was found
+    const animatePath = async (groups: (number[] | Set<number>)[]) => {
+        const [allPathsSearched, shortestPathFound] = groups
+
+        const allPathsSearchedArray = Array.from(allPathsSearched)
+
+        const shortestPathFoundArray = Array.from(shortestPathFound)
+
+        const combinedPathArr = allPathsSearchedArray.concat(shortestPathFoundArray)
+
+        const pathSize = allPathsSearchedArray.length
+
+        const shortestPathSize = shortestPathFoundArray.length
+
+        const delayBetweenCellAnimation = 100
+
+        const gridClearDelay = 2000
+
+        clearAnimationQueue()
+
+        const newAnimationQueue: number[] = []
+
+        for (let i = 0; i < pathSize + shortestPathSize; i++) {
+            newAnimationQueue.push(
                 setTimeout(() => {
-                    dispatch({ type: 'changeCellVisitedStatusToTrue', payload: { cellId: arr } })
-                    res('completed')
-                }, 10)
-            })
+                    dispatch({ type: 'changeCellVisitedStatusToTrue', payload: { cellId: combinedPathArr[i] } })
+                }, i * delayBetweenCellAnimation)
+            )
+
+            if (i == pathSize - 1) {
+                newAnimationQueue.push(
+                    setTimeout(() => {
+                        dispatch({ type: 'resetVisitedCell' })
+                    }, i * delayBetweenCellAnimation)
+                )
+            }
         }
-        await new Promise(res => {
-            setTimeout(() => {
-                dispatch({ type: 'resetVisitedCell' })
-                res('completed')
-            }, 1000)
-        })
-        for (const arr of groups[1]) {
-            await new Promise(res => {
-                setTimeout(() => {
-                    dispatch({ type: 'changeCellVisitedStatusToTrue', payload: { cellId: arr } })
-                    res('completed')
-                }, 0)
-            })
-        }
-        await new Promise(res => {
-            setTimeout(() => {
-                dispatch({ type: 'resetVisitedCell' })
-                res('completed')
-            }, 1000)
-        })
+
+        animationQueue.current.push(newAnimationQueue)
+
+        return newAnimationQueue
     }
 
     return (
@@ -395,14 +418,14 @@ const App = (): JSX.Element => {
 
                 <PaperWithDefaults>
                     <ButtonGroup>
-                        <Button onClick={e => dispatch({ type: 'hardResetAllGrid' })} variant='outlined' size='small'>
+                        <Button onClick={_ => dispatch({ type: 'hardResetAllGrid' })} variant='outlined' size='small'>
                             Reset Entire Grid
                         </Button>
-                        <Button onClick={e => dispatch({ type: 'resetVisitedCell' })} variant='outlined' size='small'>
+                        <Button onClick={_ => dispatch({ type: 'resetVisitedCell' })} variant='outlined' size='small'>
                             Reset visited cells
                         </Button>
                         <Button
-                            onClick={e => console.log('TODO: saving layout currently not supported')}
+                            onClick={_ => console.log('TODO: saving layout currently not supported')}
                             variant='outlined'
                             size='small'
                         >
@@ -411,7 +434,7 @@ const App = (): JSX.Element => {
                     </ButtonGroup>
                 </PaperWithDefaults>
                 <PaperWithDefaults>
-                    <Button variant='contained' size='small' onClick={e => runSelectedAlgorithm(selectedAlgorithm)}>
+                    <Button variant='contained' size='small' onClick={_ => runSelectedAlgorithm(selectedAlgorithm)}>
                         Run
                     </Button>
                 </PaperWithDefaults>
