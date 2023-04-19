@@ -2,40 +2,20 @@ import {
     Box,
     Paper,
     Button,
-    Chip,
     Container,
     RadioGroup,
-    FormControl,
-    FormLabel,
     FormControlLabel,
     Radio,
-    Alert,
-    Snackbar,
-    AlertProps,
-    AlertColor,
     ButtonGroup,
-    Input,
     Slider,
-    TextField,
     Typography,
-    useMediaQuery,
 } from '@mui/material'
 import './App.css'
 import { cloneDeep } from 'lodash'
-import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import { useReducer, useRef, useState } from 'react'
 import './index.css'
 import GridCell from './components/GridCell'
 import { dfs } from './pathfindingAlgorithms/dfs'
-import {
-    animated,
-    ForwardProps,
-    SpringProps,
-    SpringRef,
-    SpringValue,
-    useSpring,
-    useSprings,
-    useSpringValue,
-} from '@react-spring/web'
 import { bfs } from './pathfindingAlgorithms/bfs'
 import { dijkstra } from './pathfindingAlgorithms/dijkstra'
 import { astart } from './pathfindingAlgorithms/astar'
@@ -343,8 +323,6 @@ const App = (): JSX.Element => {
 
         const delayBetweenCellAnimation = 100
 
-        const gridClearDelay = 2000
-
         clearAnimationQueue()
 
         const newAnimationQueue: number[] = []
@@ -454,7 +432,7 @@ const App = (): JSX.Element => {
                         gap: 0.5,
                     }}
                 >
-                    {new Array(gridSize * gridSize).fill('').map((cellProps, i, cellApi) => (
+                    {new Array(gridSize * gridSize).fill('').map((cellProps, i) => (
                         <GridCell
                             key={i}
                             cellId={i}

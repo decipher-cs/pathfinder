@@ -1,7 +1,7 @@
 
 # Trailblazer-Pathfinder-Visualizer
 
-Visialise various pathfinding algorithms
+Electron app to visialise various pathfinding algorithms. See live website [here](https://tranquil-cat-414e66.netlify.app/)
 
 ## Description
 
@@ -28,6 +28,13 @@ You can start the dev server with `yarn dev` and try out the project in your bro
 ## Usage
 
 Drag your cursor on the grid to place walls which cannot be crossed by the algorithm. Then place the start and end block anywhere on the grid. Now just click `run` and watch the algorithm find its way to the end.
+
+## Tech Used
+
+- Typescript React
+- ElectronJS
+- Material UI
+- Vite
 
 
 ## Things I learned
