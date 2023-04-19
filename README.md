@@ -14,11 +14,13 @@ Electron app to visialise various pathfinding algorithms. See live website [here
 
 ## Table of Contents
 
+- [Description](#description)
+- [Demo](#demo)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Tech Used](#Tech-Used)
-- [Things I learnt](#Things-I-Learned)
-- [Known Issues](#Known-Issues)
+- [Tech Used](#tech-used)
+- [Things I learnt](#things-i-learned)
+- [Known Issues](#known-issues)
 - [Credits](#credits)
 - [License](#license)
 
