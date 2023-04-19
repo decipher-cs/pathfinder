@@ -12,12 +12,13 @@ Electron app to visialise various pathfinding algorithms. See live website [here
 
 ![demo gif](./public/trailblazer.gif)
 
-## Table of Contents (Optional)
-
-If your README is long, add a table of contents to make it easy for users to find what they need.
+## Table of Contents
 
 - [Installation](#installation)
 - [Usage](#usage)
+- [Tech Used](#Tech-Used)
+- [Things I learnt](#Things-I-Learned)
+- [Known Issues](#Known-Issues)
 - [Credits](#credits)
 - [License](#license)
 
