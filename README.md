@@ -55,6 +55,7 @@ See [Maze-solving algorithms on wikipedia](https://en.wikipedia.org/wiki/Maze-so
 [Spanning Tree Youtube channel - Dijkstra's algorithm](https://www.youtube.com/watch?v=EFg3u_E6eHU)
 [Texicab Geometry](https://en.wikipedia.org/wiki/Taxicab_geometry)
 [Astar search algorithm](https://briangrinstead.com/blog/astar-search-algorithm-in-javascript/)
+[CSS dot pattern background](https://codepen.io/edmundojr/pen/xOYJGw)
 
 ## License
 
