@@ -43,7 +43,7 @@ export interface AlgorithmArgs {
 }
 
 export interface AlgorithmRetrunValue {
-    allTakedPath: Set<number> | number[]
+    allTakenPath: Set<number> | number[]
     shortestPath?: Set<number> | number[]
 }
 
