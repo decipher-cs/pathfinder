@@ -38,7 +38,8 @@ function App() {
     }, [])
 
     return (
-        <Box sx={{ height: '100svh', width: '100vw', display: 'grid', placeItems: 'center' }} className='lattice-bg'>
+        <Box sx={{ minHeight: '100svh', width: '100vw', display: 'grid', placeItems: 'center' }} className='lattice-bg'>
+            <GridConfigComponent grid={grid} setGrid={setGrid} rows={rows} columns={columns} />
             <Box
                 sx={{
                     display: 'grid',
@@ -49,7 +50,7 @@ function App() {
                     padding: 2,
                     borderRadius: 5,
                     minWidth: '10%',
-                    maxWidth: '100%',
+                    maxWidth: '90%',
                 }}
                 className='bg-gradient'
             >
@@ -64,7 +65,6 @@ function App() {
                     />
                 ))}
             </Box>
-            <GridConfigComponent grid={grid} setGrid={setGrid} rows={rows} columns={columns} />
         </Box>
     )
 }
