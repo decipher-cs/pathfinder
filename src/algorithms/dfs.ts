@@ -15,7 +15,6 @@ export const dfs = (grid: Grid): number[] => {
 
         if (!currentCell) continue
 
-        currentCell.visitedStatus = 'visited'
         pathsTried.add(currentCell.index)
 
         if (currentCell.type === 'finish') break
@@ -24,7 +23,7 @@ export const dfs = (grid: Grid): number[] => {
         const neighbors = getNeighbors(currentCell, grid)
 
         for (const neighbor of neighbors) {
-            if (neighbor.visitedStatus === 'unvisited' && neighbor.type !== 'close') {
+            if (!pathsTried.has(neighbor.index) && neighbor.type !== 'close') {
                 stack.push(neighbor)
             }
         }
