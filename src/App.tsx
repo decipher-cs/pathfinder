@@ -1,41 +1,14 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { Box, Button, ButtonGroup, CssBaseline, MenuItem, Paper, TextField } from '@mui/material'
+import { useCallback, useRef } from 'react'
+import { Box } from '@mui/material'
 import './App.css'
-import { Cell, CellType, Grid, SearchAlgorithm, searchAlgorithms } from './types'
+import { Cell, CellType } from './types'
 import GridCell from './components/Cell'
-import GridConfig from './components/GridConfig'
-
-const rows = 20
-const columns = 20
-const cellSize = 20
-
-export const constructGrid = (rows: number, columns: number): Grid => {
-    if (rows <= 0 || columns <= 0) throw new Error('incorrect value for rows or columns while constructing grid')
-
-    const grid: Grid = []
-    for (let i = 0; i < rows; i++) {
-        for (let j = 0; j < columns; j++) {
-            grid.push({
-                index: i * columns + j,
-                coordinates: [i, j],
-                type: 'open',
-                visitedStatus: 'unvisited',
-            })
-        }
-    }
-
-    const getRandom = () => Math.floor(Math.random() * (rows * columns))
-
-    let random = getRandom()
-    grid[random] = { ...grid[random], type: 'start' }
-    random = getRandom()
-    grid[random] = { ...grid[random], type: 'finish' }
-
-    return grid
-}
+import GridConfigComponent from './components/GridConfig'
+import { useGridConfig } from './stateStore/gridConfigStore'
 
 function App() {
-    const [grid, setGrid] = useState(() => constructGrid(rows, columns))
+    const { grid, columns, rows, cellSize } = useGridConfig()
+    const { setGrid } = useGridConfig.getState()
 
     const previouslyPlacedCell = useRef<Extract<CellType, 'start' | 'finish'>>('start')
 
@@ -72,14 +45,16 @@ function App() {
                     gridTemplateRows: `repeat(${rows}, auto)`,
                     gridTemplateColumns: `repeat(${columns}, auto)`,
 
-                    gap: 0.1,
+                    gap: 0.3,
                     padding: 2,
                     borderRadius: 5,
+                    minWidth: '10%',
+                    maxWidth: '100%',
                 }}
                 className='bg-gradient'
             >
                 {grid.map(cell => (
-                    <CellComponent
+                    <GridCell
                         key={cell.index}
                         cellSize={cellSize}
                         cell={cell}
@@ -89,7 +64,7 @@ function App() {
                     />
                 ))}
             </Box>
-            <GridConfig grid={grid} setGrid={setGrid} rows={rows} columns={columns} />
+            <GridConfigComponent grid={grid} setGrid={setGrid} rows={rows} columns={columns} />
         </Box>
     )
 }
