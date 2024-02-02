@@ -27,18 +27,20 @@ class PriorityQueue {
 // Define the Dijkstra function
 export function dijkstra(grid: Grid): number[] {
     // Initialize the visited nodes array
-    let visitedNodes: number[] = []
+    const visitedNodes = new Set<number>()
 
     // Initialize the distances array with Infinity
-    let distances: number[] = Array(grid.length).fill(Infinity)
+    const distances: number[] = Array(grid.length).fill(Infinity)
 
     // Initialize the priority queue
     let queue = new PriorityQueue()
 
     // Find the start node
-    let startNode = grid.find(cell => cell.type === 'start')
-    if (!startNode) {
-        throw new Error('Start node not found')
+    const startNode = grid.find(cell => cell.type === 'start')
+    const endNode = grid.find(cell => cell.type === 'finish')
+
+    if (!startNode || !endNode) {
+        throw new Error('Start/ Finish node not found')
     }
 
     // Set the distance of the start node to 0
@@ -48,60 +50,55 @@ export function dijkstra(grid: Grid): number[] {
     queue.enqueue(startNode.index, 0)
 
     while (queue.nodes.length) {
-        let currentNode = queue.dequeue()
+        const currentNode = queue.dequeue()
 
-        if (currentNode) {
-            let currentCell = grid[currentNode.index]
+        if (!currentNode) continue
 
-            // Mark the current node as visited
-            visitedNodes.push(currentNode.index)
-            currentCell.visitedStatus = 'visited'
+        const currentCell = grid[currentNode.index]
 
-            // If the current node is the finish node, break the loop
-            if (currentCell.type === 'finish') {
-                break
-            }
+        // Mark the current node as visited
+        visitedNodes.add(currentNode.index)
 
-            // Calculate the tentative distances to the neighboring nodes
-            let neighbors = getNeighbors(currentNode.index, grid)
-            for (let neighbor of neighbors) {
-                let alt = distances[currentNode.index] + 1 // Assuming all edges have a weight of 1
-                if (alt < distances[neighbor.index]) {
-                    distances[neighbor.index] = alt
-                    queue.enqueue(neighbor.index, alt)
-                }
+        // If the current node is the finish node, break the loop
+        if (currentCell.type === 'finish') break
+
+        // Calculate the tentative distances to the neighboring nodes
+        const neighbors = getNeighbors(grid[currentNode.index], grid).filter(
+            neighbor => !visitedNodes.has(neighbor.index),
+        )
+
+        for (const neighbor of neighbors) {
+            const alt = distances[currentNode.index] + 1 // Assuming all edges have a weight of 1
+            if (alt < distances[neighbor.index]) {
+                distances[neighbor.index] = alt
+                queue.enqueue(neighbor.index, alt)
             }
         }
     }
 
-    return visitedNodes
+    return Array.from(visitedNodes)
 }
 
-// Define a function to get the neighbors of a node
-function getNeighbors(index: number, grid: Grid): Cell[] {
-    // Assuming the grid is a square grid
-    let size = Math.sqrt(grid.length)
-    let neighbors: Cell[] = []
+function getNeighbors(cell: Cell, grid: Grid): Cell[] {
+    const [x, y] = cell.coordinates
+    const neighbors: Cell[] = []
 
-    // Up
-    if (index >= size) {
-        neighbors.push(grid[index - size])
+    const directions: [number, number][] = [
+        [-1, 0], // left
+        [1, 0], // right
+        [0, -1], // up
+        [0, 1], // down
+    ]
+
+    for (const [dx, dy] of directions) {
+        const newX = x + dx
+        const newY = y + dy
+        const neighbor = grid.find(cell => cell.coordinates[0] === newX && cell.coordinates[1] === newY)
+
+        if (neighbor) {
+            neighbors.push(neighbor)
+        }
     }
 
-    // Down
-    if (index < grid.length - size) {
-        neighbors.push(grid[index + size])
-    }
-
-    // Left
-    if (index % size !== 0) {
-        neighbors.push(grid[index - 1])
-    }
-
-    // Right
-    if (index % size !== size - 1) {
-        neighbors.push(grid[index + 1])
-    }
-
-    return neighbors.filter(cell => cell.type !== 'close' && cell.visitedStatus === 'unvisited')
+    return neighbors.filter(cell => cell.type !== 'close')
 }

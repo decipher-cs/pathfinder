@@ -44,6 +44,7 @@ export function astar(grid: Grid): number[] {
     openSet.push(startCell)
 
     // Maps to keep track of the best path and scores
+    // f=g+h, h=heuristic cost, g=cost from starting node to current node
     const cameFrom = new Map<Cell, Cell>()
     const gScore = new Map<Cell, number>()
     gScore.set(startCell, 0)
@@ -53,20 +54,15 @@ export function astar(grid: Grid): number[] {
     // Array to keep track of the visited cells
     const visitedCells = new Set<number>()
 
-    // Main loop of the algorithm
     while (!openSet.isEmpty()) {
         const current = openSet.pop()
-        if (!current) {
-            throw new Error('Unexpected error: current cell is undefined')
-        }
-
-        // If the current cell is the finish cell, return the visited cells
-        if (current.type === 'finish') {
-            return Array.from(visitedCells)
-        }
+        if (!current) throw new Error('Unexpected error: current cell is undefined')
 
         // Add the current cell to the visited cells
         visitedCells.add(current.index)
+
+        // If the current cell is the finish cell, return the visited cells
+        if (current.type === 'finish') break
 
         // Process all neighbors of the current cell
         for (const neighbor of getNeighbors(current, grid)) {
@@ -83,7 +79,6 @@ export function astar(grid: Grid): number[] {
         }
     }
 
-    // If the algorithm finished without finding a path, return the visited cells
     return Array.from(visitedCells)
 }
 
