@@ -38,7 +38,17 @@ function App() {
     }, [])
 
     return (
-        <Box sx={{ minHeight: '100svh', width: '100vw', display: 'grid', placeItems: 'center' }} className='lattice-bg'>
+        <Box
+            sx={{
+                minHeight: '100svh',
+                width: '100vw',
+                display: 'grid',
+                justifyItems: 'center',
+                alignItems: 'flex-start',
+                gridTemplateRows: 'auto fit-content',
+            }}
+            className='lattice-bg'
+        >
             <GridConfigComponent grid={grid} setGrid={setGrid} rows={rows} columns={columns} />
             <Box
                 sx={{
