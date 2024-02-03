@@ -44,24 +44,20 @@ export function bfs(grid: Grid): number[] {
     while (queue.nodes.length) {
         const currentNode = queue.dequeue()
 
-        if (currentNode) {
-            const currentCell = grid[currentNode.index]
+        if (!currentNode) continue
 
-            // Mark the current node as visited
-            visitedNodes.add(currentNode.index)
+        const currentCell = grid[currentNode.index]
 
-            // If the current node is the finish node, break the loop
-            if (currentCell.type === 'finish') break
+        visitedNodes.add(currentCell.index)
 
-            // Enqueue the unvisited neighbors
-            const neighbors = getNeighbors(grid[currentNode.index], grid).filter(
-                neighbor => !visitedNodes.has(neighbor.index),
-            )
+        if (currentCell.type === 'finish') break
 
-            for (const neighbor of neighbors) {
-                if (neighbor.visitedStatus === 'unvisited') {
-                    queue.enqueue(neighbor.index)
-                }
+        // Enqueue the unvisited neighbors
+        const neighbors = getNeighbors(currentCell, grid)
+
+        for (const neighbor of neighbors) {
+            if (!visitedNodes.has(neighbor.index)) {
+                queue.enqueue(neighbor.index)
             }
         }
     }
