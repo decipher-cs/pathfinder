@@ -13,8 +13,11 @@ export type Cell = {
 
 export type Grid = Cell[]
 
+export type GridStatus = 'searching' | 'animating' | 'ready' | 'error'
+
 export type GridConfig = {
     grid: Grid
+    status: GridStatus
     animationSpeed: number
     rows: number
     columns: number
@@ -24,6 +27,7 @@ export type GridConfig = {
 
 export type GridConfigActions = {
     setGrid: (fn: (grid: Grid) => Grid) => void
+    setGridStatus: (status: GridStatus) => void
     changeColumns: (val: number) => void
     changeDensity: (val: number) => void
     changeCellSize: (val: number) => void
