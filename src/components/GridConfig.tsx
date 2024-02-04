@@ -7,19 +7,24 @@ import { dijkstra } from '../algorithms/dijkstra'
 import { bfs } from '../algorithms/bfs'
 import { constructGrid, useGridConfig } from '../stateStore/gridConfigStore'
 
-export const solveGrid = (grid: Grid, algorithm: SearchAlgorithm): number[] => {
-    switch (algorithm) {
-        case 'dfs':
-            return dfs(grid)
-        case 'astar':
-            return astar(grid)
-        case 'bfs':
-            return bfs(grid)
-        case 'dijkstra':
-            return dijkstra(grid)
-        default:
-            throw new Error('Unsupported Algorithm')
-    }
+export const worker = new Worker(new URL('../worker.ts', import.meta.url), { type: 'module' })
+
+export const solveGrid = async (grid: Grid, algorithm: SearchAlgorithm): Promise<number[]> => {
+    return new Promise((res, rej) => {
+        worker.postMessage({ grid, algorithm } satisfies { grid: Grid; algorithm: SearchAlgorithm })
+
+        const handleResult = (e: MessageEvent<number[]>) => {
+            res(e.data)
+            worker.removeEventListener('message', handleResult)
+        }
+        const handleError = (e: ErrorEvent) => {
+            rej(e.message)
+            worker.removeEventListener('error', handleError)
+        }
+
+        worker.onmessage = handleResult
+        worker.onerror = handleError
+    })
 }
 
 type GridConfigProps = {
@@ -32,8 +37,9 @@ type GridConfigProps = {
 const GridConfig = (props: GridConfigProps) => {
     const { grid, setGrid, rows, columns } = props
 
-    const { animationSpeed, cellSize, density } = useGridConfig()
-    const { changeColumns, changeDensity, changeCellSize, changeAnimationSpeed, changeRows } = useGridConfig.getState()
+    const { animationSpeed } = useGridConfig()
+
+    const { changeColumns, changeAnimationSpeed, changeRows } = useGridConfig.getState()
 
     const [selectedSearchAlgorithm, setSelectedSearchAlgorithm] = useState<SearchAlgorithm>(searchAlgorithms[0])
 
@@ -83,20 +89,30 @@ const GridConfig = (props: GridConfigProps) => {
 
     const successAnimation = () => {}
 
+    useEffect(() => {
+        return () => {
+            worker.terminate()
+        }
+    }, [])
+
     return (
         <Box
+            component={motion.div}
+            animate={{ scale: [0, 1] }}
+            transition={{ delay: 1 }}
             sx={{
                 display: 'flex',
                 width: '100%',
                 justifyContent: 'center',
                 alignItems: 'center',
-                gap: 4,
+                gap: 2,
                 flexWrap: 'wrap',
-                p: 4,
+                p: 2,
             }}
         >
-            <Paper sx={{ p: 2 }}>
+            <Paper sx={{ p: 2, width: '20%' }}>
                 <TextField
+                    sx={{ width: '100%' }}
                     select
                     value={selectedSearchAlgorithm}
                     label={'search algorithm'}
@@ -109,19 +125,7 @@ const GridConfig = (props: GridConfigProps) => {
                     ))}
                 </TextField>
             </Paper>
-            <Paper>
-                <ButtonGroup sx={{ background: 'white', px: 3, py: 2 }} variant='outlined'>
-                    <Button onClick={resetGrid}>Reset</Button>
-                    <Button
-                        onClick={() => {
-                            const result = solveGrid(structuredClone(grid), selectedSearchAlgorithm)
-                            animatePathWithDelay(result)
-                        }}
-                    >
-                        solve
-                    </Button>
-                </ButtonGroup>
-            </Paper>
+
             <Paper sx={{ p: 2, width: '20%' }}>
                 Rows: {rows}
                 <Slider
@@ -144,12 +148,15 @@ const GridConfig = (props: GridConfigProps) => {
                     onChange={(_, v) => (Array.isArray(v) ? changeColumns(v[0]) : changeColumns(v))}
                 />
             </Paper>
+
             <Paper sx={{ p: 2, width: '20%' }}>
                 animation speed
                 <TextField
                     type='number'
                     InputProps={{ endAdornment: 'X' }}
                     size='small'
+                    inputProps={{ min: 0, max: 90 }}
+                    required
                     value={animationSpeed}
                     onChange={e => {
                         const value = Number(e.target.value)
@@ -157,6 +164,26 @@ const GridConfig = (props: GridConfigProps) => {
                     }}
                     helperText='Greater value yields faster animation'
                 />
+            </Paper>
+
+            <div style={{ width: '100%' }}></div>
+
+            <Paper sx={{ p: 2 }}>
+                <ButtonGroup variant='contained'>
+                    <Button onClick={resetGrid}>Reset</Button>
+                    <Button
+                        onClick={async () => {
+                            try {
+                                const result = await solveGrid(grid, selectedSearchAlgorithm)
+                                animatePathWithDelay(result)
+                            } catch (err) {
+                                console.log('caught error:', err)
+                            }
+                        }}
+                    >
+                        solve
+                    </Button>
+                </ButtonGroup>
             </Paper>
         </Box>
     )
