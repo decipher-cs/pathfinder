@@ -1,19 +1,39 @@
+import { z } from 'zod'
+
 export const searchAlgorithms = ['dfs', 'bfs', 'astar', 'dijkstra'] as const
 
 export type SearchAlgorithm = (typeof searchAlgorithms)[number]
 
-export type CellType = 'open' | 'close' | 'start' | 'finish'
+export const cellType = {
+    open: 'open',
+    close: 'close',
+    start: 'start',
+    finish: 'finish',
+} as const
 
-export type Cell = {
-    readonly index: number
-    readonly coordinates: [number, number]
-    readonly type: CellType
-    readonly visitedStatus: 'visited' | 'unvisited'
-}
+export type CellType = keyof typeof cellType
 
-export type Grid = Cell[]
+export const CellSchema = z.object({
+    index: z.number(),
+    coordinates: z.tuple([z.number(), z.number()]).readonly(),
+    visitedStatus: z.union([z.literal('visited'), z.literal('unvisited')]),
+    type: z.nativeEnum(cellType),
+})
 
-export type GridStatus = 'searching' | 'animating' | 'ready' | 'error'
+export type Cell = z.infer<typeof CellSchema>
+
+export const GridSchema = z.array(CellSchema)
+
+export type Grid = z.infer<typeof GridSchema>
+
+export const gridStatus = {
+    solving: 'solving',
+    animating: 'animating',
+    'waiting to start': 'waiting to start',
+    error: 'error',
+} as const
+
+export type GridStatus = keyof typeof gridStatus
 
 export type GridConfig = {
     grid: Grid

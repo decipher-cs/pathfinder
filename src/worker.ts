@@ -2,10 +2,13 @@ import { astar } from './algorithms/astar'
 import { bfs } from './algorithms/bfs'
 import { dfs } from './algorithms/dfs'
 import { dijkstra } from './algorithms/dijkstra'
-import { Grid, SearchAlgorithm } from './types'
+import { Grid, GridSchema, SearchAlgorithm, searchAlgorithms } from './types'
 
 onmessage = (e: MessageEvent<{ grid: Grid; algorithm: SearchAlgorithm }>) => {
     const { grid, algorithm } = e.data
+
+    if (!searchAlgorithms.includes(algorithm) || !GridSchema.safeParse(grid))
+        throw new Error('Incorrect grid layout or unsupported algorithm')
 
     switch (algorithm) {
         case 'dfs':
