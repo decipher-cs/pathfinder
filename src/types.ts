@@ -13,16 +13,18 @@ export const cellType = {
 
 export type CellType = keyof typeof cellType
 
-export const CellSchema = z.object({
-    index: z.number(),
-    coordinates: z.tuple([z.number(), z.number()]).readonly(),
-    visitedStatus: z.union([z.literal('visited'), z.literal('unvisited')]),
-    type: z.nativeEnum(cellType),
-})
+export const CellSchema = z
+    .object({
+        index: z.number(),
+        coordinates: z.tuple([z.number(), z.number()]).readonly(),
+        visitedStatus: z.union([z.literal('visited'), z.literal('unvisited')]),
+        type: z.nativeEnum(cellType),
+    })
+    .readonly()
 
 export type Cell = z.infer<typeof CellSchema>
 
-export const GridSchema = z.array(CellSchema)
+export const GridSchema = z.array(CellSchema).readonly()
 
 export type Grid = z.infer<typeof GridSchema>
 
@@ -42,15 +44,18 @@ export type GridConfig = {
     rows: number
     columns: number
     cellSize: number
-    density: number // ?? It's like, how many rows and columns in a given grid...idk hard to explain... need to think this through ??
 }
 
 export type GridConfigActions = {
     setGrid: (fn: (grid: Grid) => Grid) => void
     setGridStatus: (status: GridStatus) => void
     changeColumns: (val: number) => void
-    changeDensity: (val: number) => void
     changeCellSize: (val: number) => void
     changeAnimationSpeed: (val: number) => void
     changeRows: (val: number) => void
+}
+
+export type AlgorithmReturnType = {
+    pathTaken: number[]
+    shortestPath: number[] | null
 }
