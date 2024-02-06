@@ -1,6 +1,6 @@
-import { Cell, Grid } from '../types'
+import { AlgorithmReturnType, Cell, Grid } from '../types'
 
-export const dfs = (grid: Grid): number[] => {
+export const dfs = (grid: Grid): AlgorithmReturnType => {
     const stack: Cell[] = []
     const startCell = grid.find(cell => cell.type === 'start')
     const finishCell = grid.find(cell => cell.type === 'finish')
@@ -29,7 +29,7 @@ export const dfs = (grid: Grid): number[] => {
         }
     }
 
-    return Array.from(pathsTried)
+    return { pathTaken: Array.from(pathsTried), shortestPath: null }
 }
 
 function getNeighbors(cell: Cell, grid: Grid): Cell[] {

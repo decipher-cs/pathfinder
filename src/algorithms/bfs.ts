@@ -1,4 +1,4 @@
-import { Cell, Grid } from '../types'
+import { AlgorithmReturnType, Cell, Grid } from '../types'
 
 // Define a type for a queue node
 type QueueNode = {
@@ -23,7 +23,7 @@ class Queue {
 }
 
 // Define the BFS function
-export function bfs(grid: Grid): number[] {
+export function bfs(grid: Grid): AlgorithmReturnType {
     // Initialize the visited nodes array
     const visitedNodes = new Set<number>()
 
@@ -62,7 +62,7 @@ export function bfs(grid: Grid): number[] {
         }
     }
 
-    return Array.from(visitedNodes)
+    return { pathTaken: Array.from(visitedNodes), shortestPath: null }
 }
 
 function getNeighbors(cell: Cell, grid: Grid): Cell[] {

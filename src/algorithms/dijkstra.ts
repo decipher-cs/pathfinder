@@ -1,4 +1,4 @@
-import { Cell, Grid } from '../types'
+import { AlgorithmReturnType, Cell, Grid } from '../types'
 
 // Define a type for a priority queue node
 type PriorityQueueNode = {
@@ -25,7 +25,7 @@ class PriorityQueue {
 }
 
 // Define the Dijkstra function
-export function dijkstra(grid: Grid): number[] {
+export function dijkstra(grid: Grid): AlgorithmReturnType {
     // Initialize the visited nodes array
     const visitedNodes = new Set<number>()
 
@@ -76,7 +76,7 @@ export function dijkstra(grid: Grid): number[] {
         }
     }
 
-    return Array.from(visitedNodes)
+    return { pathTaken: Array.from(visitedNodes), shortestPath: null }
 }
 
 function getNeighbors(cell: Cell, grid: Grid): Cell[] {

@@ -1,4 +1,4 @@
-import { Cell, Grid } from '../types'
+import { AlgorithmReturnType, Cell, Grid } from '../types'
 
 // Define a priority queue data structure
 type PriorityQueue<T> = {
@@ -31,7 +31,7 @@ function createPriorityQueue<T>(priorityFunction: (elements: T) => number): Prio
 }
 
 // The main A* pathfinding function
-export function astar(grid: Grid): number[] {
+export function astar(grid: Grid): AlgorithmReturnType {
     // Find the start and finish cells in the grid
     const startCell = grid.find(cell => cell.type === 'start')
     const finishCell = grid.find(cell => cell.type === 'finish')
@@ -79,7 +79,7 @@ export function astar(grid: Grid): number[] {
         }
     }
 
-    return Array.from(visitedCells)
+    return { pathTaken: Array.from(visitedCells), shortestPath: null }
 }
 
 // Heuristic function for A* (Manhattan distance)
