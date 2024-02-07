@@ -35,6 +35,8 @@ export function dijkstra(grid: Grid): AlgorithmReturnType {
     // Initialize the priority queue
     let queue = new PriorityQueue()
 
+    const prevNode = new Map<Cell, Cell>()
+
     // Find the start node
     const startNode = grid.find(cell => cell.type === 'start')
     const endNode = grid.find(cell => cell.type === 'finish')
@@ -68,15 +70,29 @@ export function dijkstra(grid: Grid): AlgorithmReturnType {
         )
 
         for (const neighbor of neighbors) {
-            const alt = distances[currentNode.index] + 1 // Assuming all edges have a weight of 1
+            const alt = distances[currentNode.index] + 1 // since all edges have a weight of 1
             if (alt < distances[neighbor.index]) {
                 distances[neighbor.index] = alt
                 queue.enqueue(neighbor.index, alt)
             }
+            prevNode.set(neighbor, currentCell)
         }
     }
 
-    return { pathTaken: Array.from(visitedNodes), shortestPath: null }
+    const shortestPath: number[] = []
+
+    let current = endNode
+
+    while (current !== startNode) {
+        shortestPath.push(current.index)
+        const cell = prevNode.get(current)
+        if (cell) current = cell
+        else break
+    }
+
+    shortestPath.push(startNode.index)
+
+    return { pathTaken: Array.from(visitedNodes), shortestPath }
 }
 
 function getNeighbors(cell: Cell, grid: Grid): Cell[] {

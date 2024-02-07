@@ -87,7 +87,9 @@ export function astar(grid: Grid): AlgorithmReturnType {
         shortestPath.push(current.index)
         const cell = cameFrom.get(current)
         if (cell) current = cell
+        else break
     }
+
     shortestPath.push(startCell.index)
 
     return { pathTaken: Array.from(visitedCells), shortestPath }
