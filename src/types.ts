@@ -44,6 +44,7 @@ export type GridConfig = {
     rows: number
     columns: number
     cellSize: number
+    actionOnDrag: 'add wall' | 'remove wall'
 }
 
 export type GridConfigActions = {
@@ -53,6 +54,8 @@ export type GridConfigActions = {
     changeCellSize: (val: number) => void
     changeAnimationSpeed: (val: number) => void
     changeRows: (val: number) => void
+    changeActionOnDrag: () => void
+    getGrid: () => Grid
 }
 
 export type AlgorithmReturnType = {
