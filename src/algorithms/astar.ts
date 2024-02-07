@@ -79,7 +79,18 @@ export function astar(grid: Grid): AlgorithmReturnType {
         }
     }
 
-    return { pathTaken: Array.from(visitedCells), shortestPath: null }
+    const shortestPath: number[] = []
+
+    let current = finishCell
+
+    while (current !== startCell) {
+        shortestPath.push(current.index)
+        const cell = cameFrom.get(current)
+        if (cell) current = cell
+    }
+    shortestPath.push(startCell.index)
+
+    return { pathTaken: Array.from(visitedCells), shortestPath }
 }
 
 // Heuristic function for A* (Manhattan distance)
