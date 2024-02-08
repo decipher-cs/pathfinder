@@ -1,19 +1,36 @@
 import { Box } from '@mui/material'
 import { motion, useAnimate, useAnimation } from 'framer-motion'
-import React, { memo, useEffect, useRef } from 'react'
-import { CellType, Cell as TCell } from '../types'
+import { memo } from 'react'
+import { Cell } from '../types'
+import { useGridConfig } from '../stateStore/gridConfigStore'
+import { useShallow } from 'zustand/react/shallow'
 
 type CellProps = {
-    cell: TCell
-    cellSize: number
-    changeCellTypeToStartOrFinish: (index: number, newType: Extract<CellType, 'start' | 'finish'>) => void
-    toggleCellTypeBetweenOpenClose: (index: number) => void
-    previouslyPlacedCell: React.MutableRefObject<'finish' | 'start'>
+    index: number
 }
 
 const Cell = (props: CellProps) => {
-    const { toggleCellTypeBetweenOpenClose, previouslyPlacedCell, cell, cellSize, changeCellTypeToStartOrFinish } =
-        props
+    const { index } = props
+
+    const { cell, cellSize, getGrid, actionOnDrag, setGrid } = useGridConfig(
+        useShallow(state => ({
+            cell: state.grid[props.index],
+            cellSize: state.cellSize,
+            getGrid: state.getGrid,
+            actionOnDrag: state.actionOnDrag,
+            setGrid: state.setGrid,
+        })),
+    )
+
+    const changeCellTypeToStartOrFinish = (index: number, newType: Extract<Cell['type'], 'start' | 'finish'>) => {
+        setGrid(prevGrid => {
+            return prevGrid.map(cell => {
+                if (cell.type === newType && cell.index !== index) return { ...cell, type: 'open' }
+                if (cell.type !== newType && cell.index === index) return { ...cell, type: newType }
+                return cell
+            })
+        })
+    }
 
     return (
         <Box
@@ -33,22 +50,29 @@ const Cell = (props: CellProps) => {
                 scale: 1.3,
                 transition: { duration: 0.01 },
             }}
-            onDrag={() => false}
             onClick={() => {
-                const prevCell = previouslyPlacedCell.current
-                if (prevCell === 'start') {
-                    changeCellTypeToStartOrFinish(cell.index, 'finish')
-                    previouslyPlacedCell.current = 'finish'
-                } else if (prevCell === 'finish') {
-                    changeCellTypeToStartOrFinish(cell.index, 'start')
-                    previouslyPlacedCell.current = 'start'
-                }
+                const c = getGrid().find(c => c.type === 'start' || c.type === 'finish')
+                if (!c) changeCellTypeToStartOrFinish(index, 'start')
+                else if (c.type === 'start') changeCellTypeToStartOrFinish(index, 'finish')
+                else if (c.type === 'finish') changeCellTypeToStartOrFinish(index, 'start')
             }}
+            onMouseDown={e => e.preventDefault()}
+            onDrag={e => e.preventDefault()}
             onMouseEnter={e => {
-                if (e.buttons === 1) toggleCellTypeBetweenOpenClose(cell.index)
+                if (e.buttons === 1)
+                    setGrid(p => {
+                        return p.map(cell => {
+                            if (cell.index === index) {
+                                if (actionOnDrag === 'add wall') return { ...cell, type: 'close' }
+                                if (actionOnDrag === 'remove wall') return { ...cell, type: 'open' }
+                            }
+                            return cell
+                        })
+                    })
             }}
             sx={{
                 // background: cell.type === 'close' ? '#000' : '#fff',
+                background: '#fff',
                 // transform: cell.type === 'close' ? 'scale(1)' : 'scale(1)',
                 // transition: 'background 1s, transform',
                 width: `${cellSize}px`,
@@ -57,9 +81,7 @@ const Cell = (props: CellProps) => {
                 borderRadius: '3px',
                 cursor: 'pointer',
             }}
-        >
-            {/* {cell.type === 'close' ? <BlockRoundedIcon fontSize='small' /> : null} */}
-        </Box>
+        ></Box>
     )
 }
 

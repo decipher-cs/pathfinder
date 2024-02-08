@@ -1,19 +1,17 @@
-import { Box, Button, ButtonGroup, MenuItem, Paper, Slider, TextField } from '@mui/material'
+import { Box, Button, ButtonGroup, MenuItem, Paper, Slider, Switch, TextField, Typography } from '@mui/material'
 import { memo, useRef, useState } from 'react'
-import { Grid, GridConfigActions, SearchAlgorithm, searchAlgorithms } from '../types'
-import { dfs } from '../algorithms/dfs'
-import { astar } from '../algorithms/astar'
-import { dijkstra } from '../algorithms/dijkstra'
-import { bfs } from '../algorithms/bfs'
+import { AlgorithmReturnType, Grid, SearchAlgorithm, searchAlgorithms } from '../types'
 import { constructGrid, useGridConfig } from '../stateStore/gridConfigStore'
+import { motion } from 'framer-motion'
+import { useShallow } from 'zustand/react/shallow'
 
 export const worker = new Worker(new URL('../worker.ts', import.meta.url), { type: 'module' })
 
-export const solveGrid = async (grid: Grid, algorithm: SearchAlgorithm): Promise<number[]> => {
+export const solveGrid = async (grid: Grid, algorithm: SearchAlgorithm): Promise<AlgorithmReturnType> => {
     return new Promise((res, rej) => {
         worker.postMessage({ grid, algorithm } satisfies { grid: Grid; algorithm: SearchAlgorithm })
 
-        const handleResult = (e: MessageEvent<number[]>) => {
+        const handleResult = (e: MessageEvent<AlgorithmReturnType>) => {
             res(e.data)
             worker.removeEventListener('message', handleResult)
         }
@@ -27,21 +25,17 @@ export const solveGrid = async (grid: Grid, algorithm: SearchAlgorithm): Promise
     })
 }
 
-type GridConfigProps = {
-    grid: Grid
-    setGrid: GridConfigActions['setGrid']
-    rows: number
-    columns: number
-}
+const GridConfig = () => {
+    const [rows, columns, animationSpeed, actionOnDrag] = useGridConfig(
+        useShallow(state => [state.rows, state.columns, state.animationSpeed, state.actionOnDrag]),
+    )
 
-const GridConfig = (props: GridConfigProps) => {
-    const { grid, setGrid, rows, columns } = props
+    // https://github.com/pmndrs/zustand/discussions/2194
+    // same as useGridConfig(useShallow())
+    const { changeColumns, changeAnimationSpeed, changeRows, changeActionOnDrag, setGrid, getGrid } =
+        useGridConfig.getState()
 
-    const { animationSpeed } = useGridConfig()
-
-    const { changeColumns, changeAnimationSpeed, changeRows } = useGridConfig.getState()
-
-    const [selectedSearchAlgorithm, setSelectedSearchAlgorithm] = useState<SearchAlgorithm>(searchAlgorithms[0])
+    const [selectedSearchAlgorithm, setSelectedSearchAlgorithm] = useState<SearchAlgorithm>(searchAlgorithms[2])
 
     const timeoutQueue = useRef<ReturnType<typeof setTimeout>[]>([])
 
@@ -55,18 +49,15 @@ const GridConfig = (props: GridConfigProps) => {
         timeoutQueue.current = []
     }
 
-    const animatePathWithDelay = (cellIndexArr: number[], delayInMs = 1000 / animationSpeed): void => {
+    const animateTakenPathWithDelay = (cellIndexArr: number[], delayInMs = 1000 / animationSpeed) => {
         let timeout = 0
         const animationSequence = cellIndexArr.map(cellIndex => {
             return new Promise(res => {
                 const timeoutId = setTimeout(
                     () => {
-                        setGrid(p => {
-                            return p.map(cell => {
-                                if (cell.index === cellIndex) return { ...cell, visitedStatus: 'visited' }
-                                return cell
-                            })
-                        })
+                        setGrid(p =>
+                            p.map(cell => (cell.index === cellIndex ? { ...cell, visitedStatus: 'visited' } : cell)),
+                        )
                         res(cellIndex)
                     },
                     (timeout += delayInMs),
@@ -74,26 +65,16 @@ const GridConfig = (props: GridConfigProps) => {
                 timeoutQueue.current.push(timeoutId)
             })
         })
-        Promise.all(animationSequence).then(cellIndexArr => {
-            // Reset all visited paths to unvisited. This ready ups the grid for another run
-            cellIndexArr.forEach(cellIndex => {
-                setGrid(p => {
-                    return p.map(cell => {
-                        if (cell.index === cellIndex) return { ...cell, visitedStatus: 'unvisited' }
-                        return cell
-                    })
-                })
-            })
-        })
+        return Promise.all(animationSequence)
     }
 
-    const successAnimation = () => {}
+    const successAnimation = () => {
+        alert('success')
+    }
 
-    useEffect(() => {
-        return () => {
-            worker.terminate()
-        }
-    }, [])
+    const failureAnimation = () => {
+        alert('failed')
+    }
 
     return (
         <Box
@@ -106,11 +87,11 @@ const GridConfig = (props: GridConfigProps) => {
                 justifyContent: 'center',
                 alignItems: 'center',
                 gap: 2,
-                flexWrap: 'wrap',
+                flexWrap: 'nowrap',
                 p: 2,
             }}
         >
-            <Paper sx={{ p: 2, width: '20%' }}>
+            <Paper sx={{ p: 1.5, width: '20%' }}>
                 <TextField
                     sx={{ width: '100%' }}
                     select
@@ -130,22 +111,22 @@ const GridConfig = (props: GridConfigProps) => {
                 Rows: {rows}
                 <Slider
                     step={5}
-                    value={rows}
                     marks
                     valueLabelDisplay='auto'
                     min={10}
                     max={50}
-                    onChange={(_, v) => (Array.isArray(v) ? changeRows(v[0]) : changeRows(v))}
+                    value={rows}
+                    onChange={(_, v) => changeRows(Array.isArray(v) ? v[0] : v)}
                 />
                 Columns: {columns}
                 <Slider
-                    value={columns}
                     step={5}
                     valueLabelDisplay='auto'
                     marks
                     min={10}
                     max={50}
-                    onChange={(_, v) => (Array.isArray(v) ? changeColumns(v[0]) : changeColumns(v))}
+                    value={columns}
+                    onChange={(_, v) => changeColumns(Array.isArray(v) ? v[0] : v)}
                 />
             </Paper>
 
@@ -166,24 +147,56 @@ const GridConfig = (props: GridConfigProps) => {
                 />
             </Paper>
 
-            <div style={{ width: '100%' }}></div>
-
             <Paper sx={{ p: 2 }}>
-                <ButtonGroup variant='contained'>
+                <ButtonGroup size='small' variant='contained'>
                     <Button onClick={resetGrid}>Reset</Button>
                     <Button
                         onClick={async () => {
                             try {
-                                const result = await solveGrid(grid, selectedSearchAlgorithm)
-                                animatePathWithDelay(result)
+                                /*
+                                 * Animate taken path
+                                 * If found 'finish'
+                                 *      show shortest path (if shortest path available)
+                                 *      play success animation
+                                 * Else
+                                 *      play failure animation
+                                 * Reset the grid
+                                 * */
+
+                                const { pathTaken, shortestPath } = await solveGrid(getGrid(), selectedSearchAlgorithm)
+
+                                const [, endingCell] = [pathTaken.shift(), pathTaken.pop()] as [number, number] // remove annotation and do a type check instead
+
+                                const triggeredCells = await animateTakenPathWithDelay(pathTaken)
+                                triggeredCells.forEach(cellIndex => {
+                                    setGrid(p => {
+                                        return p.map(cell => {
+                                            if (cell.index === cellIndex) return { ...cell, visitedStatus: 'unvisited' }
+                                            return cell
+                                        })
+                                    })
+                                })
+
+                                const finishCell = getGrid().filter(c => c.type === 'finish')[0].index
+
+                                if (endingCell === finishCell) {
+                                    if (shortestPath) await animateTakenPathWithDelay(shortestPath)
+                                    else successAnimation()
+                                } else failureAnimation()
                             } catch (err) {
-                                console.log('caught error:', err)
+                                alert('caught error: ' + err)
                             }
                         }}
                     >
                         solve
                     </Button>
                 </ButtonGroup>
+            </Paper>
+            <Paper sx={{ p: 2 }}>
+                <Typography>Drag action:</Typography>
+                add walls
+                <Switch value={actionOnDrag === 'add wall'} onChange={changeActionOnDrag} />
+                remove walls
             </Paper>
         </Box>
     )
