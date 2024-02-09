@@ -46,7 +46,7 @@ export const useGridConfig = create<GridConfig & GridConfigActions>()((set, get)
                 return { columns: newVal, grid: constructGrid(state.rows, newVal) }
             }),
 
-        cellSize: 20,
+        cellSize: 30,
         changeCellSize: (newVal: number) => set(_ => ({ cellSize: newVal })),
 
         animationSpeed: 30,
