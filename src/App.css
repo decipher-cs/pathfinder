@@ -7,7 +7,6 @@
 
 .lattice-bg {
     background-color: #36454f;
-    color: red;
     background:
         linear-gradient(90deg, #161122 21px, transparent 1%) center,
         linear-gradient(#161122 21px, transparent 1%) center,
@@ -38,10 +37,14 @@
         background: white;
         margin: 10px;
         border-radius: 3px;
+        width: 30px;
+        height: 30px;
     }
     &::-webkit-scrollbar-thumb {
         /* background: var(--scrollbar-gradient); */
         background: black;
+        width: 30px;
+        height: 30px;
         border-radius: 3px;
     }
 }

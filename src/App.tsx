@@ -1,7 +1,7 @@
-import { Box, debounce } from '@mui/material'
+import { Box } from '@mui/material'
 import './App.css'
-import GridConfigComponent from './components/GridConfig'
 import Grid from './components/Grid'
+import { FabGroup } from './components/FabGroup'
 
 function App() {
     return (
@@ -11,15 +11,13 @@ function App() {
                 width: '100vw',
                 display: 'grid',
                 justifyItems: 'center',
-                alignItems: 'flex-start',
-                gridTemplateRows: 'auto fit-content',
+                alignItems: 'center',
                 overflow: 'hidden',
-                px: 1,
-                py: 2,
+                p: 1,
             }}
             className='lattice-bg'
         >
-            <GridConfigComponent />
+            <FabGroup />
             <Grid />
         </Box>
     )

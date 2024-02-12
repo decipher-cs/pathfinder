@@ -1,5 +1,5 @@
 import { Box } from '@mui/material'
-import { motion, useAnimate, useAnimation } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { memo } from 'react'
 import { Cell } from '../types'
 import { useGridConfig } from '../stateStore/gridConfigStore'
@@ -7,16 +7,16 @@ import { useShallow } from 'zustand/react/shallow'
 
 type CellProps = {
     index: number
+    cellTypeToPlaceOnClick: React.MutableRefObject<'start' | 'finish'>
 }
 
 const Cell = (props: CellProps) => {
-    const { index } = props
+    const { cellTypeToPlaceOnClick, index } = props
 
-    const { cell, cellSize, getGrid, actionOnDrag, setGrid } = useGridConfig(
+    const { cell, cellSize, actionOnDrag, setGrid } = useGridConfig(
         useShallow(state => ({
             cell: state.grid[props.index],
             cellSize: state.cellSize,
-            getGrid: state.getGrid,
             actionOnDrag: state.actionOnDrag,
             setGrid: state.setGrid,
         })),
@@ -35,26 +35,19 @@ const Cell = (props: CellProps) => {
     return (
         <Box
             component={motion.div}
-            animate={cell.visitedStatus === 'visited' ? cell.visitedStatus : cell.type}
+            animate={cell.type}
             variants={{
-                visited: {
-                    backgroundColor: ['#FFFAE3', '#312E38', '#FFFAE3'],
-                    scale: [1, 0.5, 1],
-                },
-                start: { backgroundColor: '#23d5ab' },
-                finish: { backgroundColor: '#F41549' },
-                close: { backgroundColor: '#312E38' },
-                open: { backgroundColor: '#FFFAE3' },
+                start: { scale: 1.0 },
+                finish: { scale: 1.0 },
+                close: { scale: 0.8, transition: { duration: 0.2, delay: 0 } },
+                open: { scale: 1.0, transition: { duration: 0.1, delay: 0 } },
             }}
             whileHover={{
-                scale: 1.3,
-                transition: { duration: 0.01 },
+                scale: 1.2,
             }}
             onClick={() => {
-                const c = getGrid().find(c => c.type === 'start' || c.type === 'finish')
-                if (!c) changeCellTypeToStartOrFinish(index, 'start')
-                else if (c.type === 'start') changeCellTypeToStartOrFinish(index, 'finish')
-                else if (c.type === 'finish') changeCellTypeToStartOrFinish(index, 'start')
+                changeCellTypeToStartOrFinish(index, cellTypeToPlaceOnClick.current)
+                cellTypeToPlaceOnClick.current = cellTypeToPlaceOnClick.current === 'start' ? 'finish' : 'start'
             }}
             onMouseDown={e => e.preventDefault()}
             onDrag={e => e.preventDefault()}
@@ -71,14 +64,24 @@ const Cell = (props: CellProps) => {
                     })
             }}
             sx={{
-                // background: cell.type === 'close' ? '#000' : '#fff',
-                background: '#fff',
-                // transform: cell.type === 'close' ? 'scale(1)' : 'scale(1)',
-                // transition: 'background 1s, transform',
                 width: `${cellSize}px`,
                 height: `${cellSize}px`,
+                backgroundColor: () => {
+                    switch (cell.type) {
+                        case 'open':
+                            return '#FFFAE3'
+                        case 'close':
+                            return '#312E38'
+                        case 'start':
+                            return '#23d5ab'
+                        case 'finish':
+                            return '#F41549'
+                        default:
+                            return 'yellow'
+                    }
+                },
 
-                borderRadius: '3px',
+                borderRadius: 0.6,
                 cursor: 'pointer',
             }}
         ></Box>

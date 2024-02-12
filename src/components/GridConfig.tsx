@@ -1,102 +1,54 @@
-import { Box, Button, ButtonGroup, MenuItem, Paper, Slider, Switch, TextField, Typography } from '@mui/material'
+import {
+    Box,
+    BoxProps,
+    Button,
+    ButtonGroup,
+    MenuItem,
+    Paper,
+    PaperProps,
+    Slider,
+    Switch,
+    TextField,
+    Typography,
+    styled,
+} from '@mui/material'
 import { memo, useRef, useState } from 'react'
 import { AlgorithmReturnType, Grid, SearchAlgorithm, searchAlgorithms } from '../types'
 import { constructGrid, useGridConfig } from '../stateStore/gridConfigStore'
-import { motion } from 'framer-motion'
+import { motion, useAnimate } from 'framer-motion'
 import { useShallow } from 'zustand/react/shallow'
 
-export const worker = new Worker(new URL('../worker.ts', import.meta.url), { type: 'module' })
-
-export const solveGrid = async (grid: Grid, algorithm: SearchAlgorithm): Promise<AlgorithmReturnType> => {
-    return new Promise((res, rej) => {
-        worker.postMessage({ grid, algorithm } satisfies { grid: Grid; algorithm: SearchAlgorithm })
-
-        const handleResult = (e: MessageEvent<AlgorithmReturnType>) => {
-            res(e.data)
-            worker.removeEventListener('message', handleResult)
-        }
-        const handleError = (e: ErrorEvent) => {
-            rej(e.message)
-            worker.removeEventListener('error', handleError)
-        }
-
-        worker.onmessage = handleResult
-        worker.onerror = handleError
-    })
-}
-
 const GridConfig = () => {
-    const [rows, columns, animationSpeed, actionOnDrag] = useGridConfig(
-        useShallow(state => [state.rows, state.columns, state.animationSpeed, state.actionOnDrag]),
+    const [rows, columns, animationSpeed, actionOnDrag, cellSize] = useGridConfig(
+        useShallow(state => [state.rows, state.columns, state.animationSpeed, state.actionOnDrag, state.cellSize]),
     )
 
-    // https://github.com/pmndrs/zustand/discussions/2194
-    // same as useGridConfig(useShallow())
-    const { changeColumns, changeAnimationSpeed, changeRows, changeActionOnDrag, setGrid, getGrid } =
+    const { changeColumns, changeAnimationSpeed, changeRows, changeActionOnDrag, setGrid, getGrid, changeCellSize } =
         useGridConfig.getState()
 
     const [selectedSearchAlgorithm, setSelectedSearchAlgorithm] = useState<SearchAlgorithm>(searchAlgorithms[2])
 
-    const timeoutQueue = useRef<ReturnType<typeof setTimeout>[]>([])
+    // const timeoutQueue = useRef<ReturnType<typeof setTimeout>[]>([])
 
     const resetGrid = () => {
         setGrid(() => constructGrid(rows, columns))
-        dismissOngoingAnimation()
-    }
-
-    const dismissOngoingAnimation = () => {
-        timeoutQueue.current.forEach(timeoutId => clearTimeout(timeoutId))
-        timeoutQueue.current = []
-    }
-
-    const animateTakenPathWithDelay = (cellIndexArr: number[], delayInMs = 1000 / animationSpeed) => {
-        let timeout = 0
-        const animationSequence = cellIndexArr.map(cellIndex => {
-            return new Promise(res => {
-                const timeoutId = setTimeout(
-                    () => {
-                        setGrid(p =>
-                            p.map(cell => (cell.index === cellIndex ? { ...cell, visitedStatus: 'visited' } : cell)),
-                        )
-                        res(cellIndex)
-                    },
-                    (timeout += delayInMs),
-                )
-                timeoutQueue.current.push(timeoutId)
-            })
-        })
-        return Promise.all(animationSequence)
-    }
-
-    const successAnimation = () => {
-        alert('success')
-    }
-
-    const failureAnimation = () => {
-        alert('failed')
+        // dismissOngoingAnimation()
     }
 
     return (
         <Box
-            component={motion.div}
-            animate={{ scale: [0, 1] }}
-            transition={{ delay: 1 }}
             sx={{
-                display: 'flex',
-                width: '100%',
-                justifyContent: 'center',
-                alignItems: 'center',
+                display: 'grid',
                 gap: 2,
-                flexWrap: 'nowrap',
-                p: 2,
             }}
         >
-            <Paper sx={{ p: 1.5, width: '20%' }}>
+            <StyledSurface>
                 <TextField
+                    fullWidth
                     sx={{ width: '100%' }}
                     select
                     value={selectedSearchAlgorithm}
-                    label={'search algorithm'}
+                    label={'selected algorithm'}
                     onChange={e => setSelectedSearchAlgorithm(e.target.value as SearchAlgorithm)}
                 >
                     {searchAlgorithms.map(name => (
@@ -105,9 +57,19 @@ const GridConfig = () => {
                         </MenuItem>
                     ))}
                 </TextField>
-            </Paper>
+            </StyledSurface>
 
-            <Paper sx={{ p: 2, width: '20%' }}>
+            <StyledSurface>
+                Cell size: {cellSize}
+                <Slider
+                    step={5}
+                    marks
+                    valueLabelDisplay='auto'
+                    min={10}
+                    max={50}
+                    value={cellSize}
+                    onChange={(_, v) => changeCellSize(Array.isArray(v) ? v[0] : v)}
+                />
                 Rows: {rows}
                 <Slider
                     step={5}
@@ -128,16 +90,17 @@ const GridConfig = () => {
                     value={columns}
                     onChange={(_, v) => changeColumns(Array.isArray(v) ? v[0] : v)}
                 />
-            </Paper>
+            </StyledSurface>
 
-            <Paper sx={{ p: 2, width: '20%' }}>
-                animation speed
+            <StyledSurface>
                 <TextField
+                    fullWidth
                     type='number'
                     InputProps={{ endAdornment: 'X' }}
                     size='small'
                     inputProps={{ min: 0, max: 90 }}
                     required
+                    label='animation speed'
                     value={animationSpeed}
                     onChange={e => {
                         const value = Number(e.target.value)
@@ -145,61 +108,25 @@ const GridConfig = () => {
                     }}
                     helperText='Greater value yields faster animation'
                 />
-            </Paper>
+            </StyledSurface>
 
-            <Paper sx={{ p: 2 }}>
-                <ButtonGroup size='small' variant='contained'>
+            <StyledSurface>
+                <ButtonGroup size='small' variant='text'>
                     <Button onClick={resetGrid}>Reset</Button>
-                    <Button
-                        onClick={async () => {
-                            try {
-                                /*
-                                 * Animate taken path
-                                 * If found 'finish'
-                                 *      show shortest path (if shortest path available)
-                                 *      play success animation
-                                 * Else
-                                 *      play failure animation
-                                 * Reset the grid
-                                 * */
-
-                                const { pathTaken, shortestPath } = await solveGrid(getGrid(), selectedSearchAlgorithm)
-
-                                const [, endingCell] = [pathTaken.shift(), pathTaken.pop()] as [number, number] // remove annotation and do a type check instead
-
-                                const triggeredCells = await animateTakenPathWithDelay(pathTaken)
-                                triggeredCells.forEach(cellIndex => {
-                                    setGrid(p => {
-                                        return p.map(cell => {
-                                            if (cell.index === cellIndex) return { ...cell, visitedStatus: 'unvisited' }
-                                            return cell
-                                        })
-                                    })
-                                })
-
-                                const finishCell = getGrid().filter(c => c.type === 'finish')[0].index
-
-                                if (endingCell === finishCell) {
-                                    if (shortestPath) await animateTakenPathWithDelay(shortestPath)
-                                    else successAnimation()
-                                } else failureAnimation()
-                            } catch (err) {
-                                alert('caught error: ' + err)
-                            }
-                        }}
-                    >
-                        solve
-                    </Button>
+                    <Button onClick={resetGrid}>Create Random</Button>
                 </ButtonGroup>
-            </Paper>
-            <Paper sx={{ p: 2 }}>
+            </StyledSurface>
+
+            <StyledSurface>
                 <Typography>Drag action:</Typography>
                 add walls
                 <Switch value={actionOnDrag === 'add wall'} onChange={changeActionOnDrag} />
                 remove walls
-            </Paper>
+            </StyledSurface>
         </Box>
     )
 }
 
 export default memo(GridConfig)
+
+export const StyledSurface = styled(Box)<BoxProps>(_ => ({}))
