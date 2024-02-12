@@ -1,4 +1,4 @@
-import { GitHub, Settings } from '@mui/icons-material'
+import { GitHub } from '@mui/icons-material'
 import { Box, Fab } from '@mui/material'
 import { SolveGrid } from './SolveGrid'
 
@@ -11,16 +11,9 @@ export const FabGroup = () => {
                 bottom: 0,
                 right: 0,
                 zIndex: 999,
+                m: 2,
             }}
         >
-            <Fab variant='extended'>
-                <SolveGrid />
-            </Fab>
-
-            <Fab>
-                <Settings />
-            </Fab>
-
             <Fab
                 variant='circular'
                 target='_blank'
@@ -28,6 +21,10 @@ export const FabGroup = () => {
                 aria-label='view source code'
             >
                 <GitHub />
+            </Fab>
+
+            <Fab variant='extended'>
+                <SolveGrid />
             </Fab>
         </Box>
     )

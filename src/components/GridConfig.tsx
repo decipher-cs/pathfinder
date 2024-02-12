@@ -12,14 +12,14 @@ import {
     Typography,
     styled,
 } from '@mui/material'
-import { memo, useRef, useState } from 'react'
+import { CSSProperties, ForwardedRef, forwardRef, memo, useRef, useState } from 'react'
 import { AlgorithmReturnType, Grid, SearchAlgorithm, searchAlgorithms } from '../types'
 import { constructGrid, useGridConfig } from '../stateStore/gridConfigStore'
 import { motion, useAnimate } from 'framer-motion'
 import { useShallow } from 'zustand/react/shallow'
 import { SolveGrid } from './SolveGrid'
 
-const GridConfig = () => {
+const GridConfig = forwardRef((props: { style?: CSSProperties }, ref) => {
     const [rows, columns, animationSpeed, actionOnDrag, cellSize, selectedAlgorithm] = useGridConfig(
         useShallow(state => [
             state.rows,
@@ -51,14 +51,16 @@ const GridConfig = () => {
 
     return (
         <Box
+            ref={ref}
             sx={{
                 height: '100%',
-                width: '100%',
+                // width: '100%',
 
                 display: 'grid',
                 background: 'white',
                 gap: 5,
                 p: 4,
+                ...props.style,
             }}
         >
             <StyledSurface>
@@ -184,8 +186,7 @@ const GridConfig = () => {
             </StyledSurface>
         </Box>
     )
-}
-
+})
 export default memo(GridConfig)
 
 export const StyledSurface = styled(Box)<BoxProps>(_ => ({}))

@@ -18,7 +18,9 @@ const Grid = () => {
             animate={{ scale: [0, 1] }}
             transition={{ delay: 0.2 }}
             sx={{
-                placeSelf: 'center',
+                flexGrow: 1,
+
+                justifyContent: 'center',
 
                 display: 'grid',
                 gridTemplateRows: `repeat(${rows}, auto)`,
@@ -26,13 +28,13 @@ const Grid = () => {
                 overflow: 'auto',
 
                 gap: 0.3,
-                p: 2,
+                p: 3,
                 borderRadius: 3,
                 minWidth: '10%',
-                maxWidth: '95%',
                 maxHeight: '100%',
             }}
-            className='bg-gradient custom-scrollbar'
+            // className='bg-gradient custom-scrollbar'
+            className='custom-scrollbar'
         >
             {arr.map(i => (
                 <Cell key={i} index={i} cellTypeToPlaceOnClick={cellTypeToPlaceOnClick} />

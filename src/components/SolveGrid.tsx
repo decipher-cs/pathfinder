@@ -71,6 +71,11 @@ export const SolveGrid = () => {
         timeoutQueue.current.forEach(timeoutId => clearTimeout(timeoutId))
         timeoutQueue.current = []
     }
+
+    const resetVisitedCells = () => {
+        setGrid(p => p.map(c => (c.visitedStatus === 'visited' ? { ...c, visitedStateus: 'unvisited' } : c)))
+    }
+
     return (
         <Button
             aria-label='solve grid'
@@ -110,7 +115,7 @@ export const SolveGrid = () => {
                 }
             }}
         >
-            Solve {selectedAlgorithm}
+            Solve
         </Button>
     )
 }
