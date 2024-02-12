@@ -30,21 +30,15 @@
     --scrollbar-gradient: linear-gradient(45deg, #108ca6, #2c98ca, #45a3ec);
 
     &::-webkit-scrollbar {
-        width: 10px;
-        height: 10px;
+        width: 15px;
+        height: 15px;
     }
     &::-webkit-scrollbar-track {
         background: white;
-        margin: 10px;
-        border-radius: 3px;
-        width: 30px;
-        height: 30px;
+        border-radius: 4px;
     }
     &::-webkit-scrollbar-thumb {
-        /* background: var(--scrollbar-gradient); */
-        background: black;
-        width: 30px;
-        height: 30px;
-        border-radius: 3px;
+        background: var(--scrollbar-gradient);
+        border-radius: 8px;
     }
 }
