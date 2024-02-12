@@ -35,8 +35,9 @@ const Cell = (props: CellProps) => {
     return (
         <Box
             component={motion.div}
-            animate={cell.type}
+            animate={cell.visitedStatus === 'visited' ? 'visited' : cell.type}
             variants={{
+                visited: { scale: 1.1 },
                 start: { scale: 1.0 },
                 finish: { scale: 1.0 },
                 close: { scale: 0.8, transition: { duration: 0.2, delay: 0 } },
@@ -67,6 +68,7 @@ const Cell = (props: CellProps) => {
                 width: `${cellSize}px`,
                 height: `${cellSize}px`,
                 backgroundColor: () => {
+                    if (cell.visitedStatus === 'visited') return 'white'
                     switch (cell.type) {
                         case 'open':
                             return '#FFFAE3'
