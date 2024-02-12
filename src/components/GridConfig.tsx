@@ -17,16 +17,30 @@ import { AlgorithmReturnType, Grid, SearchAlgorithm, searchAlgorithms } from '..
 import { constructGrid, useGridConfig } from '../stateStore/gridConfigStore'
 import { motion, useAnimate } from 'framer-motion'
 import { useShallow } from 'zustand/react/shallow'
+import { SolveGrid } from './SolveGrid'
 
 const GridConfig = () => {
-    const [rows, columns, animationSpeed, actionOnDrag, cellSize] = useGridConfig(
-        useShallow(state => [state.rows, state.columns, state.animationSpeed, state.actionOnDrag, state.cellSize]),
+    const [rows, columns, animationSpeed, actionOnDrag, cellSize, selectedAlgorithm] = useGridConfig(
+        useShallow(state => [
+            state.rows,
+            state.columns,
+            state.animationSpeed,
+            state.actionOnDrag,
+            state.cellSize,
+            state.selectedAlgorithm,
+        ]),
     )
 
-    const { changeColumns, changeAnimationSpeed, changeRows, changeActionOnDrag, setGrid, getGrid, changeCellSize } =
-        useGridConfig.getState()
-
-    const [selectedSearchAlgorithm, setSelectedSearchAlgorithm] = useState<SearchAlgorithm>(searchAlgorithms[2])
+    const {
+        changeColumns,
+        changeAnimationSpeed,
+        changeRows,
+        changeActionOnDrag,
+        setGrid,
+        getGrid,
+        changeCellSize,
+        changeSelectedAlgorithm,
+    } = useGridConfig.getState()
 
     // const timeoutQueue = useRef<ReturnType<typeof setTimeout>[]>([])
 
@@ -38,8 +52,13 @@ const GridConfig = () => {
     return (
         <Box
             sx={{
+                height: '100%',
+                width: '100%',
+
                 display: 'grid',
-                gap: 2,
+                background: 'white',
+                gap: 5,
+                p: 4,
             }}
         >
             <StyledSurface>
@@ -47,9 +66,13 @@ const GridConfig = () => {
                     fullWidth
                     sx={{ width: '100%' }}
                     select
-                    value={selectedSearchAlgorithm}
+                    value={selectedAlgorithm}
                     label={'selected algorithm'}
-                    onChange={e => setSelectedSearchAlgorithm(e.target.value as SearchAlgorithm)}
+                    onChange={e => {
+                        const algo = e.target.value as SearchAlgorithm
+                        if (!searchAlgorithms.includes(algo)) throw new Error('Unsupported algorithm selected')
+                        changeSelectedAlgorithm(algo)
+                    }}
                 >
                     {searchAlgorithms.map(name => (
                         <MenuItem key={name} value={name}>
@@ -70,7 +93,7 @@ const GridConfig = () => {
                     value={cellSize}
                     onChange={(_, v) => changeCellSize(Array.isArray(v) ? v[0] : v)}
                 />
-                Rows: {rows}
+                <Typography>Rows: {rows}</Typography>
                 <Slider
                     step={5}
                     marks
@@ -111,17 +134,53 @@ const GridConfig = () => {
             </StyledSurface>
 
             <StyledSurface>
-                <ButtonGroup size='small' variant='text'>
-                    <Button onClick={resetGrid}>Reset</Button>
-                    <Button onClick={resetGrid}>Create Random</Button>
-                </ButtonGroup>
+                <Typography>Drag action:</Typography>
+                adds wall
+                <Switch value={actionOnDrag === 'add wall'} onChange={changeActionOnDrag} />
+                removes wall
             </StyledSurface>
 
             <StyledSurface>
-                <Typography>Drag action:</Typography>
-                add walls
-                <Switch value={actionOnDrag === 'add wall'} onChange={changeActionOnDrag} />
-                remove walls
+                <ButtonGroup variant='text' orientation='vertical' fullWidth>
+                    <Button
+                        onClick={() => {
+                            const randBool = () => Boolean(Math.floor(Math.random() * 3.5))
+                            setGrid(p =>
+                                p.map(c =>
+                                    c.type === 'open' || c.type === 'close'
+                                        ? { ...c, type: randBool() ? 'open' : 'close' }
+                                        : c,
+                                ),
+                            )
+                        }}
+                    >
+                        insert walls at random location
+                    </Button>
+                    <Button
+                        onClick={() => {
+                            setGrid(p =>
+                                p.map(c => (c.visitedStatus === 'visited' ? { ...c, visitedStatus: 'unvisited' } : c)),
+                            )
+                        }}
+                    >
+                        reset taken paths
+                    </Button>
+                    <Button
+                        onClick={() => {
+                            setGrid(p => p.map(c => (c.type === 'close' ? { ...c, type: 'open' } : c)))
+                        }}
+                    >
+                        remove all walls
+                    </Button>
+                    <Button
+                        onClick={() => {
+                            setGrid(() => constructGrid(rows, columns))
+                        }}
+                    >
+                        recreate grid
+                    </Button>
+                    <SolveGrid />
+                </ButtonGroup>
             </StyledSurface>
         </Box>
     )

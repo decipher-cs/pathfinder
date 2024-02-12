@@ -18,6 +18,8 @@ const Grid = () => {
             animate={{ scale: [0, 1] }}
             transition={{ delay: 0.2 }}
             sx={{
+                placeSelf: 'center',
+
                 display: 'grid',
                 gridTemplateRows: `repeat(${rows}, auto)`,
                 gridTemplateColumns: `repeat(${columns}, auto)`,
