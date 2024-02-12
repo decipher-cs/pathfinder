@@ -45,6 +45,7 @@ export type GridConfig = {
     columns: number
     cellSize: number
     actionOnDrag: 'add wall' | 'remove wall'
+    selectedAlgorithm: SearchAlgorithm
 }
 
 export type GridConfigActions = {
@@ -56,6 +57,7 @@ export type GridConfigActions = {
     changeRows: (val: number) => void
     changeActionOnDrag: () => void
     getGrid: () => Grid
+    changeSelectedAlgorithm: (algorithm: SearchAlgorithm) => void
 }
 
 export type AlgorithmReturnType = {
