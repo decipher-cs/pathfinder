@@ -49,6 +49,9 @@ export const useGridConfig = create<GridConfig & GridConfigActions>()((set, get)
         cellSize: 30,
         changeCellSize: (newVal: number) => set(_ => ({ cellSize: newVal })),
 
+        selectedAlgorithm: 'astar',
+        changeSelectedAlgorithm: selectedAlgorithm => set(_ => ({ selectedAlgorithm })),
+
         animationSpeed: 30,
         changeAnimationSpeed: (newVal: number) => set(_ => ({ animationSpeed: newVal })),
 
