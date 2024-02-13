@@ -21,6 +21,9 @@ const Grid = () => {
                 flexGrow: 1,
 
                 justifyContent: 'center',
+                // justifyItems: 'center',
+                alignItems: 'center',
+                alignContent: 'center',
 
                 display: 'grid',
                 gridTemplateRows: `repeat(${rows}, auto)`,
