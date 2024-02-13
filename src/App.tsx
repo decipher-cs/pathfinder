@@ -32,13 +32,18 @@ function App() {
                 <GridConfig />
             </Box>
             <Button
-                sx={{ position: 'absolute', borderRadius: '0px', zIndex: areSettingsVisible ? 0 : 999 }}
+                sx={{
+                    position: 'absolute',
+                    borderRadius: '0px',
+                    zIndex: areSettingsVisible ? 0 : 999,
+                    background: '#312E38',
+                }}
                 onClick={() => setAreSettingsVisible(p => !p)}
                 variant='contained'
                 size='large'
-                endIcon={areSettingsVisible ? <ArrowLeft /> : <ArrowRight />}
+                startIcon={<Settings />}
             >
-                <Settings />
+                Settings
             </Button>
             <Grid />
             <FabGroup />
