@@ -4,7 +4,7 @@ import { useRef } from 'react'
 import { AlgorithmReturnType, Grid, SearchAlgorithm } from '../types'
 import { useGridConfig } from '../stateStore/gridConfigStore'
 
-export const worker = new Worker(new URL('../worker.ts', import.meta.url), { type: 'module' })
+export const worker = new Worker(new URL('../WebWorkers/gridSolver.ts', import.meta.url), { type: 'module' })
 
 export const solveGrid = async (grid: Grid, algorithm: SearchAlgorithm): Promise<AlgorithmReturnType> => {
     return new Promise((res, rej) => {

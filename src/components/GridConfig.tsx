@@ -59,7 +59,8 @@ const GridConfig = forwardRef((props: { style?: CSSProperties }, ref) => {
                 display: 'grid',
                 background: 'white',
                 gap: 5,
-                p: 4,
+                px: 4,
+                py: 7,
                 ...props.style,
             }}
         >
