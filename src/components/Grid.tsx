@@ -2,11 +2,11 @@ import { Box } from '@mui/material'
 import { motion } from 'framer-motion'
 import { useGridConfig } from '../stateStore/gridConfigStore'
 import Cell from './Cell'
-import { memo, useRef } from 'react'
+import { MutableRefObject, forwardRef, memo, useRef } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { CellType } from '../types'
 
-const Grid = () => {
+const Grid = forwardRef((props, ref) => {
     const { columns, rows } = useGridConfig(useShallow(state => ({ rows: state.rows, columns: state.columns })))
     const arr = Array.from({ length: rows * columns }, (_, i) => i)
 
@@ -14,6 +14,7 @@ const Grid = () => {
 
     return (
         <Box
+            ref={ref}
             component={motion.div}
             animate={{ scale: [0, 1] }}
             transition={{ delay: 0.2 }}
@@ -44,6 +45,6 @@ const Grid = () => {
             ))}
         </Box>
     )
-}
+})
 
 export default memo(Grid)
