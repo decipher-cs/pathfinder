@@ -17,7 +17,6 @@ import { AlgorithmReturnType, Grid, SearchAlgorithm, searchAlgorithms } from '..
 import { constructGrid, useGridConfig } from '../stateStore/gridConfigStore'
 import { motion, useAnimate } from 'framer-motion'
 import { useShallow } from 'zustand/react/shallow'
-import { SolveGrid } from './SolveGrid'
 
 const GridConfig = forwardRef((props: { style?: CSSProperties }, ref) => {
     const [rows, columns, animationSpeed, actionOnDrag, cellSize, selectedAlgorithm] = useGridConfig(
@@ -44,7 +43,7 @@ const GridConfig = forwardRef((props: { style?: CSSProperties }, ref) => {
 
     // const timeoutQueue = useRef<ReturnType<typeof setTimeout>[]>([])
 
-    const resetGrid = () => {
+    const resetGrid = async () => {
         setGrid(() => constructGrid(rows, columns))
         // dismissOngoingAnimation()
     }
@@ -176,13 +175,12 @@ const GridConfig = forwardRef((props: { style?: CSSProperties }, ref) => {
                         remove all walls
                     </Button>
                     <Button
-                        onClick={() => {
+                        onClick={async () => {
                             setGrid(() => constructGrid(rows, columns))
                         }}
                     >
                         recreate grid
                     </Button>
-                    <SolveGrid />
                 </ButtonGroup>
             </StyledSurface>
         </Box>
