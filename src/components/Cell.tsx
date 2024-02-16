@@ -34,6 +34,7 @@ const Cell = (props: CellProps) => {
 
     return (
         <Box
+            className={'cellIndex' + cell.index}
             component={motion.div}
             animate={cell.visitedStatus === 'visited' ? 'visited' : cell.type}
             variants={{
