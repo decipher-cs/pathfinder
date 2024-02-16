@@ -47,6 +47,7 @@ Faster and cleaner looking implementation of trainlblazer v1. Better than its an
 
 -   [x] Support dynamic sized grids.
 -   [x] Improve recursive DFS algorithm using DP.
+-   [ ] Respect user's "prefers-reduced-motion" settings using useReducedMotion from framer-motion
 
 ## Known Issues
 
