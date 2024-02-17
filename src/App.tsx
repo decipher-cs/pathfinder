@@ -5,7 +5,7 @@ import GridConfig from './components/GridConfig'
 import { useState } from 'react'
 import { Settings } from '@mui/icons-material'
 import { FabGroup } from './components/FabGroup'
-import { AnimationPlaybackControls, useAnimate } from 'framer-motion'
+import { AnimationPlaybackControls, motion, useAnimate } from 'framer-motion'
 import { AlgorithmReturnType, Grid as TGrid, SearchAlgorithm } from './types'
 import { useGridConfig } from './stateStore/gridConfigStore'
 
@@ -49,26 +49,24 @@ function App() {
 
     return (
         <Box
+            component={motion.div}
+            animate={{ gridTemplateColumns: areSettingsVisible ? '30% 1fr' : '0% 1fr' }}
             sx={{
                 height: '100svh',
                 width: '100vw',
                 maxWidth: '100vw',
-                display: 'flex',
-                gap: areSettingsVisible ? 5 : 0,
-                overflow: 'visible',
+                display: 'grid',
+                overflow: 'hidden',
                 position: 'relative',
             }}
             className='lattice-bg'
         >
-            <Box
-                sx={{
-                    flexBasis: areSettingsVisible ? '30%' : '0px',
-                    overflow: 'hidden',
-                    transition: 'flex 0.3s ease-out',
-                }}
-            >
+            <Box sx={{ overflow: 'hidden' }}>
                 <GridConfig />
             </Box>
+
+            <Grid ref={scope} />
+            <FabGroup animateCellWithStagger={animateCellWithStagger} />
             <Button
                 sx={{
                     position: 'absolute',
@@ -85,8 +83,6 @@ function App() {
             >
                 Settings
             </Button>
-            <Grid ref={scope} />
-            <FabGroup animateCellWithStagger={animateCellWithStagger} />
         </Box>
     )
 }
