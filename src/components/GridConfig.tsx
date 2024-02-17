@@ -51,9 +51,11 @@ const GridConfig = forwardRef((props: { style?: CSSProperties }, ref) => {
     return (
         <Box
             ref={ref}
+            component={motion.div}
             sx={{
                 height: '100%',
-                // width: '100%',
+                width: '30vw',
+                overflow: 'clip',
 
                 display: 'grid',
                 background: 'white',
