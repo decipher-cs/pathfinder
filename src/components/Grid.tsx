@@ -1,8 +1,7 @@
 import { Box } from '@mui/material'
-import { motion } from 'framer-motion'
 import { useGridConfig } from '../stateStore/gridConfigStore'
 import Cell from './Cell'
-import { MutableRefObject, forwardRef, memo, useRef } from 'react'
+import { forwardRef, memo, useRef } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { CellType } from '../types'
 
@@ -15,14 +14,14 @@ const Grid = forwardRef((props, ref) => {
     return (
         <Box
             ref={ref}
-            component={motion.div}
-            animate={{ scale: [0, 1] }}
-            transition={{ delay: 0.2 }}
             sx={{
-                flexGrow: 1,
+                borderImage: 'linear-gradient(45deg, red, blue)',
+                borderImageSlice: 1,
+                borderStyle: 'solid',
+                borderWidth: '3px',
 
                 justifyContent: 'center',
-                // justifyItems: 'center',
+                justifyItems: 'center',
                 alignItems: 'center',
                 alignContent: 'center',
 
@@ -33,12 +32,10 @@ const Grid = forwardRef((props, ref) => {
 
                 gap: 0.3,
                 p: 3,
-                borderRadius: 3,
                 minWidth: '10%',
                 maxHeight: '100%',
             }}
-            // className='bg-gradient custom-scrollbar'
-            className='custom-scrollbar'
+            // className='custom-scrollbar'
         >
             {arr.map(i => (
                 <Cell key={i} index={i} cellTypeToPlaceOnClick={cellTypeToPlaceOnClick} />

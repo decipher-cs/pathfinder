@@ -148,7 +148,7 @@ const GridConfig = forwardRef((props: { style?: CSSProperties }, ref) => {
                 <ButtonGroup variant='text' orientation='vertical' fullWidth>
                     <Button
                         onClick={() => {
-                            const randBool = () => Boolean(Math.floor(Math.random() * 3.5))
+                            const randBool = () => Boolean(Math.floor(Math.random() * 3.1))
                             setGrid(p =>
                                 p.map(c =>
                                     c.type === 'open' || c.type === 'close'
