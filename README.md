@@ -10,6 +10,7 @@ Electron app to visialise various pathfinding algorithms. See live website [here
 
 ## Demo
 
+![demo gif2](./public/pathfinder.gif)
 ![demo gif](./public/trailblazer.gif)
 
 ## Table of Contents
