@@ -47,7 +47,8 @@ Faster and cleaner looking implementation of trainlblazer v1. Better than its an
 
 -   [x] Support dynamic sized grids.
 -   [x] Improve recursive DFS algorithm using DP.
--   [ ] Respect user's "prefers-reduced-motion" settings using useReducedMotion from framer-motion
+-   [ ] Respect user's "prefers-reduced-motion" settings using useReducedMotion from framer-motion.
+-   [ ] Add new input to tweek the chances of a wall getting places when running `Math.floor(Math.random() * 3.5)`. Replace `3.5` with variable.
 
 ## Known Issues
 
