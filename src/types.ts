@@ -51,12 +51,12 @@ export type GridConfig = {
 export type GridConfigActions = {
     setGrid: (fn: (grid: Grid) => Grid) => void
     setGridStatus: (status: GridStatus) => void
+    resizeGrid: () => void
     changeColumns: (val: number) => void
     changeCellSize: (val: number) => void
     changeAnimationSpeed: (val: number) => void
     changeRows: (val: number) => void
     changeActionOnDrag: () => void
-    getGrid: () => Grid
     changeSelectedAlgorithm: (algorithm: SearchAlgorithm) => void
 }
 

@@ -35,6 +35,9 @@ dependencies:
   zustand:
     specifier: ^4.5.0
     version: 4.5.0(@types/react@18.2.48)(react@18.2.0)
+  zustymiddlewarets:
+    specifier: ^1.4.2
+    version: 1.4.2(@types/react@18.2.48)(react@18.2.0)
 
 devDependencies:
   '@testing-library/jest-dom':
@@ -79,9 +82,6 @@ devDependencies:
   vitest:
     specifier: ^1.2.1
     version: 1.2.2(jsdom@24.0.0)
-  zustymiddlewarets:
-    specifier: ^1.2.0
-    version: 1.2.0
 
 packages:
 
@@ -3447,6 +3447,32 @@ packages:
       use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
 
-  /zustymiddlewarets@1.2.0:
-    resolution: {integrity: sha512-K7cOq4r0pYt/67omNAxAUMW6ruyeGX3xhYbq3MUT0jjf/VS8ljbETeHpFTvo/EAJCQ5T6U0VMKnhOiNDCym0kA==}
-    dev: true
+  /zustand@4.5.1(@types/react@18.2.48)(react@18.2.0):
+    resolution: {integrity: sha512-XlauQmH64xXSC1qGYNv00ODaQ3B+tNPoy22jv2diYiP4eoDKr9LA+Bh5Bc3gplTrFdb6JVI+N4kc1DZ/tbtfPg==}
+    engines: {node: '>=12.7.0'}
+    peerDependencies:
+      '@types/react': '>=16.8'
+      immer: '>=9.0.6'
+      react: '>=16.8'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      immer:
+        optional: true
+      react:
+        optional: true
+    dependencies:
+      '@types/react': 18.2.48
+      react: 18.2.0
+      use-sync-external-store: 1.2.0(react@18.2.0)
+    dev: false
+
+  /zustymiddlewarets@1.4.2(@types/react@18.2.48)(react@18.2.0):
+    resolution: {integrity: sha512-fwXF02TgFtrtxSwgyQg/mlFGU1lDC8bgDDQiKTARt2TqC508jTiBD/6ztb0yZ4Qp+fVBjfbOJN1JLx2PXNW+HQ==}
+    dependencies:
+      zustand: 4.5.1(@types/react@18.2.48)(react@18.2.0)
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+      - react
+    dev: false
