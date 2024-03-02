@@ -1,4 +1,4 @@
-import { Grid, GridConfig, GridConfigActions, gridStatus } from '../types'
+import { Grid, GridConfig, GridConfigActions } from '../types'
 import { create } from 'zustand'
 
 export const constructGrid = (rows: number, columns: number, startingIndex = 0): Grid => {
@@ -6,16 +6,9 @@ export const constructGrid = (rows: number, columns: number, startingIndex = 0):
 
     const grid = []
 
-    function getCoordinates(index: number): [number, number] {
-        const i = Math.floor(index / rows)
-        const j = index % columns
-        return [i, j]
-    }
-
     for (let i = startingIndex; i < rows * columns; i++) {
         grid.push({
             index: i,
-            coordinates: getCoordinates(i),
             type: 'open' as const,
             visitedStatus: 'unvisited' as const,
         })
@@ -64,9 +57,6 @@ export const useGridConfig = create<GridConfig & GridConfigActions>()((set, get)
             }
             return {}
         }),
-
-    status: gridStatus['waiting to start'],
-    setGridStatus: status => set(_ => ({ status })),
 
     rows: 20,
     changeRows: (newVal: number) => set(_ => ({ rows: newVal })),

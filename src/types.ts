@@ -16,7 +16,6 @@ export type CellType = keyof typeof cellType
 export const CellSchema = z
     .object({
         index: z.number(),
-        coordinates: z.tuple([z.number(), z.number()]).readonly(),
         visitedStatus: z.union([z.literal('visited'), z.literal('unvisited')]),
         type: z.nativeEnum(cellType),
     })
@@ -28,18 +27,12 @@ export const GridSchema = z.array(CellSchema).readonly()
 
 export type Grid = z.infer<typeof GridSchema>
 
-export const gridStatus = {
-    solving: 'solving',
-    animating: 'animating',
-    'waiting to start': 'waiting to start',
-    error: 'error',
-} as const
+export type CellWithCoordinates = z.infer<typeof CellSchema> & { coordinates: [number, number] }
 
-export type GridStatus = keyof typeof gridStatus
+export type GridWithCoordinates = CellWithCoordinates[]
 
 export type GridConfig = {
     grid: Grid
-    status: GridStatus
     animationSpeed: number
     rows: number
     columns: number
@@ -50,7 +43,6 @@ export type GridConfig = {
 
 export type GridConfigActions = {
     setGrid: (fn: (grid: Grid) => Grid) => void
-    setGridStatus: (status: GridStatus) => void
     resizeGrid: () => void
     changeColumns: (val: number) => void
     changeCellSize: (val: number) => void
