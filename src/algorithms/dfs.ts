@@ -1,6 +1,17 @@
-import { AlgorithmReturnType, Cell, Grid } from '../types'
+import {
+    AlgorithmReturnType,
+    Grid as GridWithoutCoordinates,
+    GridWithCoordinates as Grid,
+    CellWithCoordinates as Cell,
+} from '../types'
+import indexToCoordinates from './indexToCoordinates'
 
-export const dfs = (grid: Grid): AlgorithmReturnType => {
+export const dfs = (gridWithoutCoordinates: GridWithoutCoordinates, columns: number): AlgorithmReturnType => {
+    const grid = gridWithoutCoordinates.map(cell => ({
+        ...cell,
+        coordinates: indexToCoordinates(cell.index, columns),
+    })) satisfies Grid
+
     const stack: Cell[] = []
     const startCell = grid.find(cell => cell.type === 'start')
     const finishCell = grid.find(cell => cell.type === 'finish')

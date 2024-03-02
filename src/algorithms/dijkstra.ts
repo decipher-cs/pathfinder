@@ -1,4 +1,10 @@
-import { AlgorithmReturnType, Cell, Grid } from '../types'
+import {
+    AlgorithmReturnType,
+    Grid as GridWithoutCoordinates,
+    GridWithCoordinates as Grid,
+    CellWithCoordinates as Cell,
+} from '../types'
+import indexToCoordinates from './indexToCoordinates'
 
 // Define a type for a priority queue node
 type PriorityQueueNode = {
@@ -25,7 +31,12 @@ class PriorityQueue {
 }
 
 // Define the Dijkstra function
-export function dijkstra(grid: Grid): AlgorithmReturnType {
+export function dijkstra(gridWithoutCoordinates: GridWithoutCoordinates, columns: number): AlgorithmReturnType {
+    const grid = gridWithoutCoordinates.map(cell => ({
+        ...cell,
+        coordinates: indexToCoordinates(cell.index, columns),
+    })) satisfies Grid
+
     // Initialize the visited nodes array
     const visitedNodes = new Set<number>()
 

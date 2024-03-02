@@ -1,4 +1,11 @@
-import { AlgorithmReturnType, Cell, Grid } from '../types'
+import {
+    AlgorithmReturnType,
+    Cell as CellWithoutCoordinates,
+    Grid as GridWithoutCoordinates,
+    GridWithCoordinates as Grid,
+    CellWithCoordinates as Cell,
+} from '../types'
+import indexToCoordinates from './indexToCoordinates'
 
 // Define a type for a queue node
 type QueueNode = {
@@ -23,7 +30,13 @@ class Queue {
 }
 
 // Define the BFS function
-export function bfs(grid: Grid): AlgorithmReturnType {
+export function bfs(gridWithoutCoordinates: GridWithoutCoordinates, columns: number): AlgorithmReturnType {
+    console.log('starting', gridWithoutCoordinates)
+    const grid = gridWithoutCoordinates.map(cell => ({
+        ...cell,
+        coordinates: indexToCoordinates(cell.index, columns),
+    })) satisfies Grid
+
     // Initialize the visited nodes array
     const visitedNodes = new Set<number>()
 
@@ -43,6 +56,7 @@ export function bfs(grid: Grid): AlgorithmReturnType {
 
     while (queue.nodes.length) {
         const currentNode = queue.dequeue()
+        console.log(queue.nodes.length, currentNode)
 
         if (!currentNode) continue
 
@@ -61,6 +75,7 @@ export function bfs(grid: Grid): AlgorithmReturnType {
             }
         }
     }
+    console.log('done', visitedNodes )
 
     return { pathTaken: Array.from(visitedNodes), shortestPath: null }
 }

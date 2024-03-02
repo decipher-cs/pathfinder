@@ -1,4 +1,10 @@
-import { AlgorithmReturnType, Cell, Grid } from '../types'
+import {
+    AlgorithmReturnType,
+    Grid as GridWithoutCoordinates,
+    GridWithCoordinates as Grid,
+    CellWithCoordinates as Cell,
+} from '../types'
+import indexToCoordinates from './indexToCoordinates'
 
 // Define a priority queue data structure
 type PriorityQueue<T> = {
@@ -31,7 +37,12 @@ function createPriorityQueue<T>(priorityFunction: (elements: T) => number): Prio
 }
 
 // The main A* pathfinding function
-export function astar(grid: Grid): AlgorithmReturnType {
+export function astar(gridWithoutCoordinates: GridWithoutCoordinates, columns: number): AlgorithmReturnType {
+    const grid = gridWithoutCoordinates.map(cell => ({
+        ...cell,
+        coordinates: indexToCoordinates(cell.index, columns),
+    })) satisfies Grid
+
     // Find the start and finish cells in the grid
     const startCell = grid.find(cell => cell.type === 'start')
     const finishCell = grid.find(cell => cell.type === 'finish')
