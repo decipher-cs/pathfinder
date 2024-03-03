@@ -4,22 +4,20 @@ import {
     Button,
     ButtonGroup,
     MenuItem,
-    Paper,
-    PaperProps,
     Slider,
     Switch,
     TextField,
     Typography,
     styled,
 } from '@mui/material'
-import { CSSProperties, ForwardedRef, forwardRef, memo, useRef, useState } from 'react'
-import { AlgorithmReturnType, Grid, SearchAlgorithm, searchAlgorithms } from '../types'
-import { constructGrid, useGridConfig } from '../stateStore/gridConfigStore'
-import { motion, useAnimate } from 'framer-motion'
+import { CSSProperties, forwardRef, memo } from 'react'
+import { SearchAlgorithm, searchAlgorithms } from '../types'
+import { constructGrid, insertWallsAtRandom, useGridConfig } from '../stateStore/gridConfigStore'
+import { motion } from 'framer-motion'
 import { useShallow } from 'zustand/react/shallow'
 
 const GridConfig = forwardRef((props: { style?: CSSProperties }, ref) => {
-    const [rows, columns, animationSpeed, actionOnDrag, cellSize, selectedAlgorithm] = useGridConfig(
+    const [rows, columns, animationSpeed, actionOnDrag, cellSize, selectedAlgorithm, resizeGrid] = useGridConfig(
         useShallow(state => [
             state.rows,
             state.columns,
@@ -27,6 +25,7 @@ const GridConfig = forwardRef((props: { style?: CSSProperties }, ref) => {
             state.actionOnDrag,
             state.cellSize,
             state.selectedAlgorithm,
+            state.resizeGrid,
         ]),
     )
 
@@ -36,17 +35,9 @@ const GridConfig = forwardRef((props: { style?: CSSProperties }, ref) => {
         changeRows,
         changeActionOnDrag,
         setGrid,
-        getGrid,
         changeCellSize,
         changeSelectedAlgorithm,
     } = useGridConfig.getState()
-
-    // const timeoutQueue = useRef<ReturnType<typeof setTimeout>[]>([])
-
-    const resetGrid = async () => {
-        setGrid(() => constructGrid(rows, columns))
-        // dismissOngoingAnimation()
-    }
 
     return (
         <Box
@@ -106,6 +97,7 @@ const GridConfig = forwardRef((props: { style?: CSSProperties }, ref) => {
                     max={50}
                     value={rows}
                     onChange={(_, v) => changeRows(Array.isArray(v) ? v[0] : v)}
+                    onChangeCommitted={resizeGrid}
                 />
                 Columns: {columns}
                 <Slider
@@ -116,6 +108,7 @@ const GridConfig = forwardRef((props: { style?: CSSProperties }, ref) => {
                     max={50}
                     value={columns}
                     onChange={(_, v) => changeColumns(Array.isArray(v) ? v[0] : v)}
+                    onChangeCommitted={resizeGrid}
                 />
             </StyledSurface>
 
@@ -148,17 +141,13 @@ const GridConfig = forwardRef((props: { style?: CSSProperties }, ref) => {
                 <ButtonGroup variant='text' orientation='vertical' fullWidth>
                     <Button
                         onClick={() => {
-                            const randBool = () => Boolean(Math.floor(Math.random() * 3.1))
                             setGrid(p =>
-                                p.map(c =>
-                                    c.type === 'open' || c.type === 'close'
-                                        ? { ...c, type: randBool() ? 'open' : 'close' }
-                                        : c,
-                                ),
+                                p.map(c => (c.visitedStatus === 'visited' ? { ...c, visitedStatus: 'unvisited' } : c)),
                             )
+                            setGrid(insertWallsAtRandom)
                         }}
                     >
-                        insert walls at random location
+                        insert walls randomly
                     </Button>
                     <Button
                         onClick={() => {
@@ -167,21 +156,27 @@ const GridConfig = forwardRef((props: { style?: CSSProperties }, ref) => {
                             )
                         }}
                     >
-                        reset taken paths
+                        reset visited path
                     </Button>
                     <Button
                         onClick={() => {
+                            setGrid(p =>
+                                p.map(c => (c.visitedStatus === 'visited' ? { ...c, visitedStatus: 'unvisited' } : c)),
+                            )
                             setGrid(p => p.map(c => (c.type === 'close' ? { ...c, type: 'open' } : c)))
                         }}
                     >
-                        remove all walls
+                        remove walls
                     </Button>
                     <Button
                         onClick={async () => {
+                            setGrid(p =>
+                                p.map(c => (c.visitedStatus === 'visited' ? { ...c, visitedStatus: 'unvisited' } : c)),
+                            )
                             setGrid(() => constructGrid(rows, columns))
                         }}
                     >
-                        recreate grid
+                        reset
                     </Button>
                 </ButtonGroup>
             </StyledSurface>
