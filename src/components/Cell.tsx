@@ -1,4 +1,4 @@
-import { Box } from '@mui/material'
+import { Box, CircularProgress } from '@mui/material'
 import { motion } from 'framer-motion'
 import { memo } from 'react'
 import { Cell } from '../types'
@@ -32,15 +32,29 @@ const Cell = (props: CellProps) => {
         })
     }
 
+    if (cell === undefined)
+        return (
+            <Box
+                sx={{
+                    width: `${cellSize}px`,
+                    height: `${cellSize}px`,
+                    backgroundColor: '#FFFAE3',
+                    borderRadius: 0.6,
+                    cursor: 'pointer',
+                }}
+            ></Box>
+        )
+
     return (
         <Box
+            aria-label={'cell ' + cell.index}
             className={'cellIndex' + cell.index}
             component={motion.div}
             animate={cell.visitedStatus === 'visited' ? 'visited' : cell.type}
             variants={{
                 visited: { scale: 1.3 },
-                start: { scale: 1.0 },
-                finish: { scale: 1.0 },
+                start: { scale: [null, 1.3] },
+                finish: { scale: [null, 1.3] },
                 close: { scale: 1.3, transition: { duration: 0.2, delay: 0 } },
                 open: { scale: 1.0, transition: { duration: 0.2, delay: 0 } },
             }}
@@ -83,9 +97,7 @@ const Cell = (props: CellProps) => {
                             return 'yellow'
                     }
                 },
-
                 borderRadius: 0.6,
-                cursor: 'pointer',
             }}
         ></Box>
     )
