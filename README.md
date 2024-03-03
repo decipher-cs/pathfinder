@@ -1,65 +1,66 @@
+# Trailblazer v2.0
 
-# Trailblazer-Pathfinder-Visualizer
-
-Electron app to visialise various pathfinding algorithms. See live website [here](https://tranquil-cat-414e66.netlify.app/)
-
-## Description
-
-- Use algorithms like DFS, BFD, Dijkstra, and Astart to find the path to the destination.
-- See how they work with a visual representation.
-
-## Demo
-
-![demo gif2](./public/pathfinder.gif)
-![demo gif](./public/trailblazer.gif)
+Faster and cleaner looking implementation of trainlblazer v1. Better than its ancestor in every regard.
 
 ## Table of Contents
 
-- [Description](#description)
-- [Demo](#demo)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Tech Used](#tech-used)
-- [Things I learnt](#things-i-learned)
-- [Known Issues](#known-issues)
-- [Credits](#credits)
-- [License](#license)
+-   [Preview](#)
+-   [Features](#)
+-   [Whats Improved](#)
+-   [Installation](#)
+-   [Tech Used](#tech-used)
+-   [Goals](#)
+-   [Known Issues](#known-issues)
+-   [Acknowledgment](#)
+-   [License](#license)
+
+## Preview
+
+![preview gif](./public/trailblazer.gif)
+
+## Features
+
+-   Highly performent.
+-   Support for various algorithms.
+-   Soft design.
+-   Web workers to free the main thread while solving the 'maze'
+
+## Whats Improvmented
+
+-   Added framer motion for better animation
+-   Included zustand for state managment
 
 ## Installation
 
-You can start the dev server with `yarn dev` and try out the project in your browser. You can also build the binaries with electron forge using `yarn make`. You'll find the binaries inside `/out/make/[your os]/`. Ones inside the directory, choose the rpm/ deb/ exe file and install it. The package is called pathfinder.
-
-## Usage
-
-Drag your cursor on the grid to place walls which cannot be crossed by the algorithm. Then place the start and end block anywhere on the grid. Now just click `run` and watch the algorithm find its way to the end.
+`pnpn i && pnpm dev`
 
 ## Tech Used
 
-- Typescript React
-- ElectronJS
-- Material UI
-- Vite
+-   Typescript
+-   React
+-   MUI
+-   Vite
+-   Framer Motion
+-   Zustand
 
+## Goals
 
-## Things I learned
-
-- Plan things ahead. Have an outline ready before starting the project.
-- Refactor often
+-   [x] Support dynamic sized grids.
+-   [x] Improve recursive DFS algorithm using DP.
+-   [ ] Respect user's "prefers-reduced-motion" settings using useReducedMotion from framer-motion.
+-   [ ] Add new input to tweek the chances of a wall getting places when running `Math.floor(Math.random() * 3.5)`. Replace `3.5` with variable.
 
 ## Known Issues
 
-- [ ] Running new instance of the algorithm should not be possible if prevous algorithm is not completed. -> animatePath
+## Acknowledgment
 
-## Credits
-
-See [Maze-solving algorithms on wikipedia](https://en.wikipedia.org/wiki/Maze-solving_algorithm)
-[Spanning Tree Youtube channel - Dijkstra's algorithm](https://www.youtube.com/watch?v=EFg3u_E6eHU)
-[Texicab Geometry](https://en.wikipedia.org/wiki/Taxicab_geometry)
-[Astar search algorithm](https://briangrinstead.com/blog/astar-search-algorithm-in-javascript/)
-[CSS dot pattern background](https://codepen.io/edmundojr/pen/xOYJGw)
+-   See [Maze-solving algorithms on wikipedia](https://en.wikipedia.org/wiki/Maze-solving_algorithm)
+-   [Spanning Tree Youtube channel - Dijkstra's algorithm](https://www.youtube.com/watch?v=EFg3u_E6eHU)
+-   [Texicab Geometry](https://en.wikipedia.org/wiki/Taxicab_geometry)
+-   [Astar search algorithm](https://briangrinstead.com/blog/astar-search-algorithm-in-javascript/)
+-   [CSS dot pattern background](https://codepen.io/edmundojr/pen/xOYJGw)
+-   You can destructure using commans. [[, , value]](https://github.com/microsoft/TypeScript/issues/10571#issuecomment-242913490)
 
 ## License
 
-The last section of a high-quality README file is the license. This lets other developers know what they can and cannot do with your project. If you need help choosing a license, refer to [https://choosealicense.com/](https://choosealicense.com/).
-
----
+GNU GENERAL PUBLIC LICENSE

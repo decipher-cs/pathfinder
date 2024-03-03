@@ -1,3 +1,19 @@
+.bg-gradient {
+    background-image: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+    background-size: 400% 400%;
+
+    animation: bg-transition 10s ease infinite;
+}
+
+.lattice-bg {
+    background-color: #36454f;
+    background:
+        linear-gradient(90deg, #161122 21px, transparent 1%) center,
+        linear-gradient(#161122 21px, transparent 1%) center,
+        #a799cc;
+    background-size: 22px 22px;
+}
+
 @keyframes bg-transition {
     0% {
         background-position: 0% 50%;
@@ -10,16 +26,19 @@
     }
 }
 
-.bg-transition {
-    /* margin: 0; */
-    /* display: flex; */
-    /* place-items: center; */
-    /* place-content: center; */
-    /* min-width: 320px; */
-    /* min-height: 100vh; */
+.custom-scrollbar {
+    --scrollbar-gradient: linear-gradient(45deg, #108ca6, #2c98ca, #45a3ec);
 
-    background-image: linear-gradient(-45deg, #ee7752,#e73c7e,#23a6d5,#23d5ab);
-    background-size: 400% 400%;
-
-    animation: bg-transition 10s ease infinite;
+    &::-webkit-scrollbar {
+        width: 15px;
+        height: 15px;
+    }
+    &::-webkit-scrollbar-track {
+        background: white;
+        border-radius: 4px;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: var(--scrollbar-gradient);
+        border-radius: 8px;
+    }
 }
