@@ -6,16 +6,20 @@ import { useGridConfig } from '../stateStore/gridConfigStore'
 import { AnimationPlaybackControls } from 'framer-motion'
 import { useShallow } from 'zustand/react/shallow'
 
-type FabGroupProps = { animateCellWithStagger: (arr: number[]) => AnimationPlaybackControls[] }
+type FabGroupProps = {
+    animateCellWithStagger: (arr: number[], onComplete: () => void) => AnimationPlaybackControls[]
+    cancelAnimations: () => void
+}
 
 export const FabGroup = (props: FabGroupProps) => {
-    const { animateCellWithStagger } = props
+    const { animateCellWithStagger, cancelAnimations } = props
 
-    const { setGrid, selectedAlgorithm, grid } = useGridConfig(
+    const { setGrid, selectedAlgorithm, grid, columns } = useGridConfig(
         useShallow(s => ({
             grid: s.grid,
             setGrid: s.setGrid,
             selectedAlgorithm: s.selectedAlgorithm,
+            columns: s.columns,
         })),
     )
 
@@ -41,12 +45,17 @@ export const FabGroup = (props: FabGroupProps) => {
 
             <Fab
                 onClick={() => {
+                    cancelAnimations()
                     setGrid(p =>
                         p.map(c => {
-                            const cell = { ...c }
-                            if (c.visitedStatus === 'visited') cell.visitedStatus = 'unvisited'
-                            if (c.type === 'close') cell.type = 'open'
-                            return Object.is(cell, c) ? c : cell
+                            if (c.visitedStatus === 'visited' || c.type === 'close')
+                                return {
+                                    ...c,
+                                    visitedStatus: 'unvisited',
+                                    type: 'open',
+                                }
+
+                            return c
                         }),
                     )
                 }}
@@ -58,20 +67,32 @@ export const FabGroup = (props: FabGroupProps) => {
                 variant='extended'
                 onClick={async () => {
                     try {
-                        const { pathTaken, shortestPath } = await solveGrid(grid, selectedAlgorithm)
+                        setGrid(p =>
+                            p.map(c => {
+                                return c.visitedStatus === 'visited' ? { ...c, visitedStatus: 'unvisited' } : c
+                            }),
+                        )
+
+                        const { pathTaken, shortestPath } = await solveGrid(grid, columns, selectedAlgorithm)
 
                         const startingCell = pathTaken.shift()
-                        const endingCell = pathTaken.pop()
+                        const lastVisitedCell = pathTaken.pop()
+                        const finishCell = grid.find(c => c.type === 'finish')
 
-                        if (startingCell === undefined || endingCell === undefined)
+                        if (startingCell === undefined) {
                             throw new Error(
-                                'Start/ finish cell not found while evaluating result. This is unexpected behaviour',
+                                'Start cell not found while evaluating result. This is unexpected behaviour',
                             )
+                        }
 
-                        const controllers = animateCellWithStagger(pathTaken)
+                        if (pathTaken.length < 1) {
+                            alert('Could not react the finishing cell. No paths lead it.')
+                        }
 
-                        controllers.at(-1)?.then(() => {
-                            if (shortestPath) {
+                        const onComplete = () => {
+                            if (finishCell?.index !== lastVisitedCell || pathTaken.length < 1) {
+                                alert('Could not react the finishing cell. No path leads it.')
+                            } else if (shortestPath) {
                                 shortestPath.shift()
                                 shortestPath.pop()
                                 setGrid(p =>
@@ -88,7 +109,9 @@ export const FabGroup = (props: FabGroupProps) => {
                                     ),
                                 )
                             }
-                        })
+                        }
+
+                        animateCellWithStagger(pathTaken, onComplete)
                     } catch (err) {
                         alert('caught error: ' + err)
                     }
