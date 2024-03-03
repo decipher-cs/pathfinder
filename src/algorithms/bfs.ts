@@ -1,6 +1,5 @@
 import {
     AlgorithmReturnType,
-    Cell as CellWithoutCoordinates,
     Grid as GridWithoutCoordinates,
     GridWithCoordinates as Grid,
     CellWithCoordinates as Cell,
@@ -31,7 +30,6 @@ class Queue {
 
 // Define the BFS function
 export function bfs(gridWithoutCoordinates: GridWithoutCoordinates, columns: number): AlgorithmReturnType {
-    console.log('starting', gridWithoutCoordinates)
     const grid = gridWithoutCoordinates.map(cell => ({
         ...cell,
         coordinates: indexToCoordinates(cell.index, columns),
@@ -75,7 +73,7 @@ export function bfs(gridWithoutCoordinates: GridWithoutCoordinates, columns: num
             }
         }
     }
-    console.log('done', visitedNodes )
+    console.log('done', visitedNodes)
 
     return { pathTaken: Array.from(visitedNodes), shortestPath: null }
 }
