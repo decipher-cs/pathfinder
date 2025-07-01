@@ -25,7 +25,7 @@ Faster and cleaner looking implementation of trainlblazer v1. Better than its an
 -   Soft design.
 -   Web workers to free the main thread while solving the 'maze'
 
-## Whats Improvmented
+## Whats Improved
 
 -   Added framer motion for better animation
 -   Included zustand for state managment
