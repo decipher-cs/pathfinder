@@ -1,43 +1,37 @@
 {
-    "name": "pathfinder",
-    "description": "App to visualize some pathfinding algorithms",
-    "version": "1.0.0",
-    "license": "GNU General Public License v3.0",
-    "author": "Decipher",
-    "type": "module",
-    "scripts": {
-        "dev": "vite",
-        "build": "tsc && vite build",
-        "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-        "preview": "vite preview",
-        "test": "vitest"
-    },
-    "dependencies": {
-        "@emotion/react": "^11.11.3",
-        "@emotion/styled": "^11.11.0",
-        "@fontsource/roboto": "^5.0.8",
-        "@mui/icons-material": "^5.15.6",
-        "@mui/material": "^5.15.6",
-        "framer-motion": "^11.0.3",
-        "react": "^18.2.0",
-        "react-dom": "^18.2.0",
-        "zod": "^3.22.4",
-        "zustand": "^4.5.0"
-    },
-    "devDependencies": {
-        "@testing-library/jest-dom": "^6.3.0",
-        "@testing-library/react": "^14.1.2",
-        "@types/react": "^18.2.43",
-        "@types/react-dom": "^18.2.17",
-        "@typescript-eslint/eslint-plugin": "^6.14.0",
-        "@typescript-eslint/parser": "^6.14.0",
-        "@vitejs/plugin-react-swc": "^3.5.0",
-        "eslint": "^8.55.0",
-        "eslint-plugin-react-hooks": "^4.6.0",
-        "eslint-plugin-react-refresh": "^0.4.5",
-        "jsdom": "^24.0.0",
-        "typescript": "^5.2.2",
-        "vite": "^5.0.8",
-        "vitest": "^1.2.1"
-    }
+  "name": "pathfinder-three-legend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.5.0",
+    "@react-three/fiber": "^9.2.0",
+    "@tailwindcss/vite": "^4.1.11",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "tailwindcss": "^4.1.11",
+    "valtio": "^2.1.5",
+    "zod": "^4.0.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.29.0",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@types/three": "^0.178.0",
+    "@vitejs/plugin-react-swc": "^3.10.2",
+    "eslint": "^9.29.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.2.0",
+    "three": "^0.178.0",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.34.1",
+    "vite": "^7.0.0"
+  }
 }

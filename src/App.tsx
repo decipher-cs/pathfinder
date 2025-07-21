@@ -1,118 +1,259 @@
-import { Box, Button } from '@mui/material'
-import './App.css'
-import Grid from './components/Grid'
-import GridConfig from './components/GridConfig'
-import {  useRef, useState } from 'react'
-import { Settings } from '@mui/icons-material'
-import { FabGroup } from './components/FabGroup'
-import { AnimationPlaybackControls, motion, useAnimate } from 'framer-motion'
-import { AlgorithmReturnType, Grid as TGrid, SearchAlgorithm } from './types'
-import { useGridConfig } from './stateStore/gridConfigStore'
-
-export const worker = new Worker(new URL('./WebWorkers/gridSolver.ts', import.meta.url), { type: 'module' })
-
-export const solveGrid = async (
-    grid: TGrid,
-    columns: number,
-    algorithm: SearchAlgorithm,
-): Promise<AlgorithmReturnType> => {
-    return new Promise((res, rej) => {
-        worker.postMessage({ grid, algorithm, columns })
-
-        const handleResult = (e: MessageEvent<AlgorithmReturnType>) => {
-            res(e.data)
-            worker.removeEventListener('message', handleResult)
-        }
-        const handleError = (e: ErrorEvent) => {
-            rej(e.message)
-            worker.removeEventListener('error', handleError)
-        }
-
-        worker.onmessage = handleResult
-        worker.onerror = handleError
-    })
-}
+import GripHorizontalIcon from "./assets/grab-handles.svg"
+import {
+  GizmoHelper,
+  GizmoViewport,
+  Grid,
+  Environment,
+  OrbitControls,
+  Instances,
+  Instance,
+  Text,
+} from "@react-three/drei"
+import { Canvas, useFrame } from "@react-three/fiber"
+import * as mazeProxy from "./stores/mazeStore"
+import { possibleNodeInteractions, uiProxy, type PossibleNodeInteractions } from "./stores/uiStore"
+import { useRef, useState, type MouseEventHandler, Suspense } from "react"
+import { useSnapshot } from "valtio"
 
 function App() {
-    const [areSettingsVisible, setAreSettingsVisible] = useState(true)
-
-    const { animationSpeed } = useGridConfig(s => ({ animationSpeed: s.animationSpeed }))
-
-    const [scope, animate] = useAnimate<HTMLDivElement>()
-
-    const ongoingAnimationControllers = useRef<AnimationPlaybackControls[]>([])
-
-    const cancelAnimations = () => {
-        ongoingAnimationControllers.current.forEach(controller => controller.cancel())
-        ongoingAnimationControllers.current = []
-    }
-
-    const animateCellWithStagger = (arr: number[], postAnimation: () => void): AnimationPlaybackControls[] => {
-        if (!scope.current) return []
-        if (ongoingAnimationControllers.current.length > 0) cancelAnimations()
-
-        let delay = 0
-        const controllers = arr.map((v, i) => {
-            const controller = animate(
-                'div.cellIndex' + v,
-                { scale: [null, 0.3, 1, null] },
-                {
-                    delay,
-                    onComplete() {
-                        if (i === arr.length - 1) {
-                            postAnimation()
-                            ongoingAnimationControllers.current = []
-                        }
-                    },
-                },
-            )
-            delay += animationSpeed / 1000
-            return controller
-        })
-
-        ongoingAnimationControllers.current.push(...controllers)
-
-        return controllers
-    }
-
-    return (
-        <Box
-            component={motion.div}
-            animate={{ gridTemplateColumns: areSettingsVisible ? '30% 1fr' : '0% 1fr' }}
-            sx={{
-                height: '100svh',
-                width: '100vw',
-                maxWidth: '100vw',
-                display: 'grid',
-                overflow: 'hidden',
-                position: 'relative',
-            }}
-            className='lattice-bg'
+  return (
+    <main className="min-w-full min-h-svh bg-gray-500 grid *:outline grid-rows-[1fr_auto] grid-cols-1">
+      <div className="">
+        <Canvas
+          gl={{ antialias: true }}
+          camera={{ position: [0, 0, 20] }}
+          onPointerUp={() => (uiProxy.orbitControlsEnabled = true)}
         >
-            <Box sx={{ overflow: 'hidden' }}>
-                <GridConfig />
-            </Box>
+          <Suspense
+            fallback={
+              <Text>
+                Building the scene. It takes a while on slower systems. Please hold your horses
+              </Text>
+            }
+          >
+            <Scene />
+          </Suspense>
+        </Canvas>
+      </div>
+      <DraggableSettings />
+    </main>
+  )
+}
 
-            <Grid ref={scope} />
-            <FabGroup animateCellWithStagger={animateCellWithStagger} cancelAnimations={cancelAnimations} />
-            <Button
-                sx={{
-                    position: 'absolute',
-                    borderRadius: '0px',
-                    zIndex: areSettingsVisible ? 0 : 999,
-                    background: '#312E38',
+const Scene = () => {
+  const { orbitControlsEnabled } = useSnapshot(uiProxy)
+
+  return (
+    <>
+      <OrbitControls enabled={orbitControlsEnabled} makeDefault />
+      <ambientLight />
+      <Cubes />
+
+      <Grid
+        position={[0, -0.01, 0]}
+        receiveShadow
+        args={[10.5, 10.5]}
+        infiniteGrid
+        fadeDistance={50}
+        fadeStrength={1}
+        sectionColor={"#a78bfa"}
+        sectionSize={4}
+        sectionThickness={1.5}
+        cellColor={"#f5f3ff"}
+        cellSize={1}
+        cellThickness={1}
+      />
+
+      <Environment preset="city" />
+      <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
+        <GizmoViewport axisColors={["#9d4b4b", "#2f7f4f", "#3b5b9d"]} labelColor="white" />
+      </GizmoHelper>
+    </>
+  )
+}
+
+function Cubes() {
+  const ui = useSnapshot(uiProxy)
+  const { clickBehavior, dragBehavior } = ui
+  const nodes = useSnapshot(mazeProxy.mazeProxy.nodes)
+  const size = nodes.length
+
+  return (
+    <Instances limit={size} onPointerDown={() => (uiProxy.orbitControlsEnabled = false)}>
+      <boxGeometry />
+      <meshStandardMaterial />
+      {nodes.map((node) => {
+        if (!node) return null
+        const { position, state, index } = node
+        const [x, y, z] = position
+        const gap = 1.1
+
+        const color = (() => {
+          let color = "pink"
+          switch (state) {
+            case "visited":
+              color = "red"
+              break
+            case "open":
+              color = "blue"
+              break
+            case "blocked":
+              color = "purple"
+              break
+            case "end":
+              color = "yellow"
+              break
+            case "start":
+              color = "white"
+              break
+            default:
+              color = "black"
+              break
+          }
+          return color
+        })()
+
+        return (
+          <Instance
+            key={index}
+            color={color}
+            scale={1}
+            position={[x * gap, y * gap, z * gap]}
+            onClick={(e) => {
+              e.stopPropagation()
+              if (clickBehavior === "open node") mazeProxy.setNodeState(position, "open")
+              else if (clickBehavior === "place end node") mazeProxy.setNodeStateToEnd(position)
+              else if (clickBehavior === "block node") mazeProxy.setNodeState(position, "blocked")
+              else if (clickBehavior === "place start node") mazeProxy.setNodeStateToStart(position)
+            }}
+            onPointerOver={(e) => {
+              e.stopPropagation()
+              if (e.buttons !== 1) return
+              if (dragBehavior === "block node") mazeProxy.setNodeState(position, "blocked")
+              else if (dragBehavior === "open node") mazeProxy.setNodeState(position, "open")
+            }}
+          />
+        )
+      })}
+    </Instances>
+  )
+}
+
+function DraggableSettings() {
+  const [position, setPosition] = useState({ x: 10, y: 10 })
+  const offsetRef = useRef({ x: 0, y: 0 })
+  const isDragging = useRef(false)
+
+  const handleMouseDown: MouseEventHandler<HTMLDivElement> = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+
+    offsetRef.current = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    }
+
+    isDragging.current = true
+
+    document.addEventListener("mousemove", handleMouseMove)
+
+    document.addEventListener("mouseup", handleMouseUp)
+  }
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging.current) return
+    setPosition({
+      x: e.clientX - offsetRef.current.x,
+      y: e.clientY - offsetRef.current.y,
+    })
+  }
+
+  const handleMouseUp = () => {
+    isDragging.current = false
+    document.removeEventListener("mousemove", handleMouseMove)
+    document.removeEventListener("mouseup", handleMouseUp)
+  }
+
+  const { dragBehavior, clickBehavior } = useSnapshot(uiProxy)
+
+  return (
+    <div
+      className="absolute z-50 bg-white shadow-lg rounded p-3 max-w-[30ch] divide-y"
+      style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
+    >
+      <div onMouseDown={handleMouseDown} className="select-none cursor-move">
+        <img src={GripHorizontalIcon} />
+      </div>
+
+      <div className="grid *:border *:cursor-pointer">
+        <button onClick={() => mazeProxy.logMaze()}>LOG</button>
+        <button
+          onClick={() => {
+            mazeProxy.resetAllNodesToOpen()
+            mazeProxy.setIsMazeEditable(true)
+          }}
+        >
+          RESET
+        </button>
+        <button
+          onClick={() => {
+            mazeProxy.runDfs()
+          }}
+        >
+          COMPUTE
+        </button>
+      </div>
+
+      <fieldset>
+        <legend>Choose what happens when you drag the cursor across the cube</legend>
+
+        <div className="grid">
+          {(["block node", "open node"] satisfies PossibleNodeInteractions[]).map((label) => (
+            <label key={label}>
+              <input
+                type="radio"
+                name={"drag action"}
+                value={label}
+                checked={label === dragBehavior}
+                onChange={(e) => {
+                  const value = e.target.value
+                  possibleNodeInteractions.forEach((v) => {
+                    if (v === "block node" || v === "open node") {
+                      if (v === value) uiProxy.dragBehavior = value
+                    }
+                  })
                 }}
-                onClick={() => {
-                    setAreSettingsVisible(p => !p)
+              />
+              {label}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Left click behaviour</legend>
+
+        <div className="grid">
+          {possibleNodeInteractions.map((label) => (
+            <label key={label}>
+              <input
+                type="radio"
+                name={"click action"}
+                value={label}
+                checked={label === clickBehavior}
+                onChange={(e) => {
+                  const value = e.target.value
+                  possibleNodeInteractions.forEach((v) => {
+                    if (v === value) uiProxy.clickBehavior = value
+                  })
                 }}
-                variant='contained'
-                size='large'
-                startIcon={<Settings />}
-            >
-                Settings
-            </Button>
-        </Box>
-    )
+              />
+              {label}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+    </div>
+  )
 }
 
 export default App
