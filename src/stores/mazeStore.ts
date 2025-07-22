@@ -1,8 +1,7 @@
-import { coordinatesToIndex, indexToCoordinates, initializeMaze } from "../util"
+import { coordinatesToIndex, initializeMaze } from "../util"
 import * as THREE from "three"
-import { type RefObject } from "react"
-import { proxy, useSnapshot } from "valtio"
-import z from "zod"
+import { proxy, snapshot } from "valtio"
+import { devtools } from "valtio/utils"
 
 export type SearchStaus = "searching" | "path found" | "path not found" | "waiting to start"
 export type Position = readonly [x: number, y: number, z: number]
@@ -14,7 +13,7 @@ export type Node = {
   state: State
   index: number
 }
-export type Maze = Node[]
+export type Maze = (Node | null)[]
 
 export type Foo = {
   nodes: Maze
@@ -33,13 +32,15 @@ export const mazeProxy = proxy<Foo>({
 })
 
 export const getNode = (arg: Position | number) => {
-  const rank = mazeProxy.rank
-
   if (typeof arg === "number") {
+    if (arg < 0) return
     return mazeProxy.nodes[arg]
   }
 
   if (Array.isArray(arg)) {
+    const rank = mazeProxy.rank
+    const [x, y, z] = arg
+    if (x < 0 || y < 0 || z < 0) return
     return mazeProxy.nodes[coordinatesToIndex(arg, rank)]
   }
 
@@ -47,7 +48,7 @@ export const getNode = (arg: Position | number) => {
 }
 
 export const setNodeState = (arg: Position | number, newState: State) => {
-  if(!mazeProxy.isMazeEditable) return
+  // if (!mazeProxy.isMazeEditable) return
   const node = getNode(arg)
 
   if (!node) return // TODO throw error
@@ -56,20 +57,22 @@ export const setNodeState = (arg: Position | number, newState: State) => {
 }
 
 export const logMaze = () => {
-  // mazeProxy.nodes.forEach((node) => console.log(node))
-  const res = mazeProxy.nodes.length
+  const res = snapshot(mazeProxy.nodes)
+  // res.forEach((node) => {
+  //   console.log(node)
+  // })
   console.log(res)
 }
 
 export const resetAllNodesToOpen = () => {
-  mazeProxy.nodes.forEach((node) => (node.state = "open"))
+  mazeProxy.nodes.forEach((node) => node?.state && (node.state = "open"))
 }
 
 export const setNodeStateToStart = (arg: Position | number) => {
   if (!mazeProxy.isMazeEditable) return
 
   mazeProxy.nodes.forEach((node) => {
-    if (node.state === "start") node.state = "open"
+    if (node?.state === "start") node.state = "open"
   })
   setNodeState(arg, "start")
 }
@@ -77,7 +80,7 @@ export const setNodeStateToStart = (arg: Position | number) => {
 export const setNodeStateToEnd = (arg: Position | number) => {
   if (!mazeProxy.isMazeEditable) return
   mazeProxy.nodes.forEach((node) => {
-    if (node.state === "end") node.state = "open"
+    if (node?.state === "end") node.state = "open"
   })
   setNodeState(arg, "end")
 }
@@ -90,7 +93,6 @@ export const getEndNode = () => mazeProxy.nodes.find((node) => node?.state === "
 
 export const runDfs = () => {
   mazeProxy.isMazeEditable = false
-  const nodes = mazeProxy.nodes
 
   const startNode = getStartNode()
   const endNode = getEndNode()
@@ -112,7 +114,10 @@ export const runDfs = () => {
       return true
     }
 
-    if (state === "blocked" || state === "visited") return
+    if (state === "blocked" || state === "visited") {
+      if (stack.length > 0 && !endNodeFound) requestAnimationFrame(logic)
+      return
+    }
 
     currNode.state = "visited"
 
@@ -124,7 +129,7 @@ export const runDfs = () => {
       const vec2 = new THREE.Vector3(...pos)
       const result = vec1.add(vec2).toArray()
 
-      const node = nodes.at(coordinatesToIndex(result, mazeProxy.rank))
+      const node = getNode(result)
       if (node && (node.state === "end" || node.state === "open")) stack.push(node)
     }
 
@@ -137,7 +142,6 @@ export const runDfs = () => {
 
 export const runBfs = () => {
   mazeProxy.isMazeEditable = false
-  const nodes = mazeProxy.nodes
 
   const startNode = getStartNode()
   const endNode = getEndNode()
@@ -146,38 +150,51 @@ export const runBfs = () => {
     return
   }
 
-  const stack = [startNode]
+  const q: Node[] = [startNode]
   let endNodeFound = false
 
   function logic() {
-    const currNode = stack.pop()
-    if (!currNode) return
-
-    const { state, position: pos } = currNode
-    if (state === "end") {
+    const currNode = q.shift()
+    if (!currNode) {
+      if (q.length > 0 && !endNodeFound) requestAnimationFrame(logic)
+      return
+    }
+    if (currNode.state === "visited") {
+      if (q.length > 0 && !endNodeFound) requestAnimationFrame(logic)
+      return
+    }
+    if (currNode.state === "end") {
       endNodeFound = true
       return true
     }
-
-    if (state === "blocked" || state === "visited") return
-
-    currNode.state = "visited"
+    if (currNode.state !== "start") setNodeState(currNode.index, "visited")
 
     // prettier-ignore
     const directions = [ [1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1] ]
 
     for (const dir of directions) {
       const vec1 = new THREE.Vector3(...dir)
-      const vec2 = new THREE.Vector3(...pos)
+      const vec2 = new THREE.Vector3(...currNode.position)
       const result = vec1.add(vec2).toArray()
 
-      const node = nodes.at(coordinatesToIndex(result, mazeProxy.rank))
-      if (node && (node.state === "end" || node.state === "open")) stack.push(node)
+      const node = getNode(result)
+      if (!node) continue
+
+      if (node.state === "end" || node.state === "open") q.push(node)
     }
 
-    if (stack.length > 0 && !endNodeFound) requestAnimationFrame(logic)
+    if (q.length > 0 && !endNodeFound) requestAnimationFrame(logic)
   }
 
-  startNode.state = "start"
   requestAnimationFrame(logic)
+}
+
+if (import.meta.env.DEV) {
+  const unsub = devtools(mazeProxy, { name: "MAZE", enabled: true })
+
+  // Put a start and end node for easy develpment
+  let node = mazeProxy.nodes.at(-1)
+  if (node) node.state = "end"
+  node = mazeProxy.nodes.at(0)
+  if (node) node.state = "start"
 }

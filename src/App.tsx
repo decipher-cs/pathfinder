@@ -9,9 +9,14 @@ import {
   Instance,
   Text,
 } from "@react-three/drei"
-import { Canvas, useFrame } from "@react-three/fiber"
+import { Canvas } from "@react-three/fiber"
 import * as mazeProxy from "./stores/mazeStore"
-import { possibleNodeInteractions, uiProxy, type PossibleNodeInteractions } from "./stores/uiStore"
+import {
+  availableAlgorithms,
+  possibleNodeInteractions,
+  uiProxy,
+  type PossibleNodeInteractions,
+} from "./stores/uiStore"
 import { useRef, useState, type MouseEventHandler, Suspense } from "react"
 import { useSnapshot } from "valtio"
 
@@ -119,8 +124,10 @@ function Cubes() {
             color={color}
             scale={1}
             position={[x * gap, y * gap, z * gap]}
+            userData={position}
             onClick={(e) => {
               e.stopPropagation()
+              console.log("clicked", index, position.toString(), state)
               if (clickBehavior === "open node") mazeProxy.setNodeState(position, "open")
               else if (clickBehavior === "place end node") mazeProxy.setNodeStateToEnd(position)
               else if (clickBehavior === "block node") mazeProxy.setNodeState(position, "blocked")
@@ -173,11 +180,11 @@ function DraggableSettings() {
     document.removeEventListener("mouseup", handleMouseUp)
   }
 
-  const { dragBehavior, clickBehavior } = useSnapshot(uiProxy)
+  const { dragBehavior, clickBehavior, selectedAlgorithm } = useSnapshot(uiProxy)
 
   return (
     <div
-      className="absolute z-50 bg-white shadow-lg rounded p-3 max-w-[30ch] divide-y"
+      className="absolute z-50 bg-white shadow-lg rounded p-3 w-[30ch] divide-y resize overflow-auto"
       style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
     >
       <div onMouseDown={handleMouseDown} className="select-none cursor-move">
@@ -188,6 +195,16 @@ function DraggableSettings() {
         <button onClick={() => mazeProxy.logMaze()}>LOG</button>
         <button
           onClick={() => {
+            mazeProxy.mazeProxy.nodes.forEach((node) => {
+              if (node?.state === "visited") node.state = "open"
+            })
+            mazeProxy.setIsMazeEditable(true)
+          }}
+        >
+          RESET VISITED
+        </button>
+        <button
+          onClick={() => {
             mazeProxy.resetAllNodesToOpen()
             mazeProxy.setIsMazeEditable(true)
           }}
@@ -196,7 +213,8 @@ function DraggableSettings() {
         </button>
         <button
           onClick={() => {
-            mazeProxy.runDfs()
+            if (selectedAlgorithm === "dfs") mazeProxy.runDfs()
+            if (selectedAlgorithm === "bfs") mazeProxy.runBfs()
           }}
         >
           COMPUTE
@@ -244,6 +262,30 @@ function DraggableSettings() {
                   const value = e.target.value
                   possibleNodeInteractions.forEach((v) => {
                     if (v === value) uiProxy.clickBehavior = value
+                  })
+                }}
+              />
+              {label}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Select the algorithm</legend>
+
+        <div className="grid">
+          {availableAlgorithms.map((label) => (
+            <label key={label}>
+              <input
+                type="radio"
+                name={"selected algorithm"}
+                value={label}
+                checked={label === selectedAlgorithm}
+                onChange={(e) => {
+                  const value = e.target.value
+                  availableAlgorithms.forEach((v) => {
+                    if (v === value) uiProxy.selectedAlgorithm = value
                   })
                 }}
               />

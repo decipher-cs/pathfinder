@@ -1,18 +1,14 @@
-import { type Position, type Maze, type Node } from "./store"
+import { type Position, type Maze, type Node } from "./stores/mazeStore"
 
 export const areArrayEqual = (a: Position, b: Position): boolean =>
   a[0] === b[0] && a[1] === b[1] && a[2] === b[2]
 
-export const coordinatesToStr = ([x, y, z]: Position) => `${x},${y},${z}`
-
-export const strToCoordinates = (position: string) => position.split(",")
-
-export const coordinatesToIndex = ([x, y, z]: Position, rank: number) => {
+export const coordinatesToIndex = ([x, y, z]: Position, rank: number): number => {
   const result = x * rank * rank + y * rank + z
   return result
 }
 
-export const indexToCoordinates = (index: number, rank: number) => {
+export const indexToCoordinates = (index: number, rank: number): Position => {
   const x = Math.floor(index / (rank * rank))
   const y = Math.floor((index / rank) % rank)
   const z = index % rank
@@ -21,7 +17,7 @@ export const indexToCoordinates = (index: number, rank: number) => {
 
 export const initializeMaze = (rank = 5): Maze => {
   const length = rank * rank * rank //TODO: maybe optimize storage (rank - 1) * (rank - 1) * (rank - 1)
-  const positions: Maze = Array(length)
+  const positions: Maze = Array(length).fill(null)
   let index = 0
 
   for (let x = 0; x < rank; x++) {
