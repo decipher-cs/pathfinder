@@ -1,6 +1,6 @@
 import { coordinatesToIndex, initializeMaze } from "../util"
 import * as THREE from "three"
-import { proxy, snapshot } from "valtio"
+import { proxy, snapshot, subscribe } from "valtio"
 import { devtools } from "valtio/utils"
 import { notify } from "./alertQueueStore"
 
@@ -49,7 +49,7 @@ export const getNode = (arg: Position | number) => {
 }
 
 export const setNodeState = (arg: Position | number, newState: State) => {
-  // if (!mazeProxy.isMazeEditable) return
+  if (!mazeProxy.isMazeEditable) return
   const node = getNode(arg)
 
   if (!node) return // TODO throw error
@@ -93,8 +93,6 @@ export const getStartNode = () => mazeProxy.nodes.find((node) => node?.state ===
 export const getEndNode = () => mazeProxy.nodes.find((node) => node?.state === "end")
 
 export const runDfs = () => {
-  mazeProxy.isMazeEditable = false
-
   const startNode = getStartNode()
   const endNode = getEndNode()
   if (!startNode || !endNode) {
@@ -142,8 +140,6 @@ export const runDfs = () => {
 }
 
 export const runBfs = () => {
-  mazeProxy.isMazeEditable = false
-
   const startNode = getStartNode()
   const endNode = getEndNode()
   if (!startNode || !endNode) {
@@ -192,6 +188,10 @@ export const runBfs = () => {
 
 if (import.meta.env.DEV) {
   const unsub = devtools(mazeProxy, { name: "MAZE", enabled: true })
+
+  subscribe(mazeProxy, () => {
+    // console.log(mazeProxy.isMazeEditable)
+  })
 
   // Put a start and end node for easy develpment
   let node = mazeProxy.nodes.at(-1)

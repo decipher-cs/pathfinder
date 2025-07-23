@@ -17,7 +17,6 @@ export type ProxyOptions = {
   clickBehavior: PossibleNodeInteractions
   dragBehavior: Extract<PossibleNodeInteractions, "block node" | "open node">
   selectedAlgorithm: AvailableAlgorithms
-  // mazeEditable: boolean
 }
 
 export const uiProxy = proxy<ProxyOptions>({

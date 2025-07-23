@@ -1,5 +1,5 @@
 // prettier-ignore
-import { GizmoHelper, GizmoViewport, Grid, Environment, OrbitControls, Text, } from "@react-three/drei"
+import { GizmoHelper, GizmoViewport, Grid, Environment, OrbitControls, Text, Stats, Trail, } from "@react-three/drei"
 import { Canvas } from "@react-three/fiber"
 import { uiProxy } from "./stores/uiStore"
 import { Suspense } from "react"
@@ -7,6 +7,7 @@ import { useSnapshot } from "valtio"
 import { DraggableSettings } from "./components/DraggableSettings"
 import { Alerts } from "./components/Alerts"
 import { Cubes } from "./components/CubeInstances"
+import * as mazeProxy from "./stores/mazeStore"
 
 function App() {
   return (
@@ -39,7 +40,8 @@ const Scene = () => {
 
   return (
     <>
-      <OrbitControls enabled={orbitControlsEnabled} makeDefault />
+      {import.meta.env.DEV && <Stats />}
+      <OrbitControls enableRotate={orbitControlsEnabled} enableDamping={true} makeDefault />
       <ambientLight />
       <Cubes />
 
@@ -58,7 +60,6 @@ const Scene = () => {
         cellThickness={1}
       />
 
-      <Environment preset="city" />
       <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
         <GizmoViewport axisColors={["#9d4b4b", "#2f7f4f", "#3b5b9d"]} labelColor="white" />
       </GizmoHelper>

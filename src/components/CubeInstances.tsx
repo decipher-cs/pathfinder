@@ -1,7 +1,7 @@
-import { useSnapshot } from "valtio";
-import { uiProxy } from "../stores/uiStore";
+import { useSnapshot } from "valtio"
+import { uiProxy } from "../stores/uiStore"
 import * as mazeProxy from "../stores/mazeStore"
-import { Instance, Instances } from "@react-three/drei";
+import { Instance, Instances } from "@react-three/drei"
 
 export const Cubes = () => {
   const ui = useSnapshot(uiProxy)
@@ -10,7 +10,13 @@ export const Cubes = () => {
   const size = nodes.length
 
   return (
-    <Instances limit={size} onPointerDown={() => (uiProxy.orbitControlsEnabled = false)}>
+    <Instances
+      limit={size}
+      onPointerDown={(e) => {
+        e.stopPropagation()
+        uiProxy.orbitControlsEnabled = false
+      }}
+    >
       <boxGeometry />
       <meshStandardMaterial />
       {nodes.map((node) => {
@@ -20,28 +26,12 @@ export const Cubes = () => {
         const gap = 1.1
 
         const color = (() => {
-          let color = "pink"
-          switch (state) {
-            case "visited":
-              color = "red"
-              break
-            case "open":
-              color = "blue"
-              break
-            case "blocked":
-              color = "purple"
-              break
-            case "end":
-              color = "yellow"
-              break
-            case "start":
-              color = "white"
-              break
-            default:
-              color = "black"
-              break
-          }
-          return color
+          if (state === "visited") return "red"
+          if (state === "open") return "blue"
+          if (state === "blocked") return "purple"
+          if (state === "end") return "yellow"
+          if (state === "start") return "red"
+          return "black"
         })()
 
         return (
@@ -60,6 +50,13 @@ export const Cubes = () => {
             }}
             onPointerOver={(e) => {
               e.stopPropagation()
+
+              // Checking for orbitControls enabled is important!
+              // This event will fire when pointer is over a node while rotating the scene
+              // When that happens, it will trigger the drag behavior which is not desired
+              // because the intention was to rotate the scene and not cause the hover action
+              if (ui.orbitControlsEnabled) return
+
               if (e.buttons !== 1) return
               if (dragBehavior === "block node") mazeProxy.setNodeState(position, "blocked")
               else if (dragBehavior === "open node") mazeProxy.setNodeState(position, "open")
