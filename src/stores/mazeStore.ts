@@ -2,6 +2,7 @@ import { coordinatesToIndex, initializeMaze } from "../util"
 import * as THREE from "three"
 import { proxy, snapshot } from "valtio"
 import { devtools } from "valtio/utils"
+import { notify } from "./alertQueueStore"
 
 export type SearchStaus = "searching" | "path found" | "path not found" | "waiting to start"
 export type Position = readonly [x: number, y: number, z: number]
@@ -15,15 +16,15 @@ export type Node = {
 }
 export type Maze = (Node | null)[]
 
-export type Foo = {
+export type MazeProxy = {
   nodes: Maze
   searchStaus: SearchStaus
-  isDirty: boolean
+  isDirty: boolean // if one of the algorithm has been run then isDirty = true
   isMazeEditable: boolean
   rank: number // The dimension of the maze. Ex: a 3x3x3 maze will have a rank of 3
 }
 
-export const mazeProxy = proxy<Foo>({
+export const mazeProxy = proxy<MazeProxy>({
   rank: 5,
   nodes: initializeMaze(),
   searchStaus: "waiting to start",
@@ -97,7 +98,7 @@ export const runDfs = () => {
   const startNode = getStartNode()
   const endNode = getEndNode()
   if (!startNode || !endNode) {
-    alert("Warning! Starting and Ending nodes must be placed before running the algorithm.")
+    notify("Starting and Ending nodes must be selected before running the algorithm.", "alert")
     return
   }
 
@@ -119,7 +120,7 @@ export const runDfs = () => {
       return
     }
 
-    currNode.state = "visited"
+    if (currNode.state !== "start") currNode.state = "visited"
 
     // prettier-ignore
     const directions = [ [1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1] ]
@@ -146,7 +147,7 @@ export const runBfs = () => {
   const startNode = getStartNode()
   const endNode = getEndNode()
   if (!startNode || !endNode) {
-    alert("Warning! Starting and Ending nodes must be placed before running the algorithm.")
+    notify("Starting and Ending nodes must be selected before running the algorithm.", "alert")
     return
   }
 
