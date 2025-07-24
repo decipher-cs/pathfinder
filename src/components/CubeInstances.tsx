@@ -1,13 +1,14 @@
 import { useSnapshot } from "valtio"
 import { uiProxy } from "../stores/uiStore"
-import * as mazeProxy from "../stores/mazeStore"
+import * as mazeActions from "../stores/mazeStore"
+import { mazeProxy } from "../stores/mazeStore"
 import { Instance, Instances } from "@react-three/drei"
 
 export const Cubes = () => {
-  const ui = useSnapshot(uiProxy)
-  const { clickBehavior, dragBehavior } = ui
-  const nodes = useSnapshot(mazeProxy.mazeProxy.nodes)
-  const size = nodes.length
+  const { clickBehavior, dragBehavior, orbitControlsEnabled } = useSnapshot(uiProxy)
+  const maze = useSnapshot(mazeProxy)
+  const size = maze.nodes.length
+  console.log("Rerendering!", mazeProxy.nodes.length, size)
 
   return (
     <Instances
@@ -19,7 +20,7 @@ export const Cubes = () => {
     >
       <boxGeometry />
       <meshStandardMaterial />
-      {nodes.map((node) => {
+      {maze.nodes.map((node) => {
         if (!node) return null
         const { position, state, index } = node
         const [x, y, z] = position
@@ -43,10 +44,11 @@ export const Cubes = () => {
             userData={position}
             onClick={(e) => {
               e.stopPropagation()
-              if (clickBehavior === "open node") mazeProxy.setNodeState(position, "open")
-              else if (clickBehavior === "place end node") mazeProxy.setNodeStateToEnd(position)
-              else if (clickBehavior === "block node") mazeProxy.setNodeState(position, "blocked")
-              else if (clickBehavior === "place start node") mazeProxy.setNodeStateToStart(position)
+              if (clickBehavior === "open node") mazeActions.setNodeState(position, "open")
+              else if (clickBehavior === "place end node") mazeActions.setNodeStateToEnd(position)
+              else if (clickBehavior === "block node") mazeActions.setNodeState(position, "blocked")
+              else if (clickBehavior === "place start node")
+                mazeActions.setNodeStateToStart(position)
             }}
             onPointerOver={(e) => {
               e.stopPropagation()
@@ -55,11 +57,11 @@ export const Cubes = () => {
               // This event will fire when pointer is over a node while rotating the scene
               // When that happens, it will trigger the drag behavior which is not desired
               // because the intention was to rotate the scene and not cause the hover action
-              if (ui.orbitControlsEnabled) return
+              if (orbitControlsEnabled) return
 
               if (e.buttons !== 1) return
-              if (dragBehavior === "block node") mazeProxy.setNodeState(position, "blocked")
-              else if (dragBehavior === "open node") mazeProxy.setNodeState(position, "open")
+              if (dragBehavior === "block node") mazeActions.setNodeState(position, "blocked")
+              else if (dragBehavior === "open node") mazeActions.setNodeState(position, "open")
             }}
           />
         )
