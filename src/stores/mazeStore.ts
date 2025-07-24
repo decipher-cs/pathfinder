@@ -1,5 +1,4 @@
-import { coordinatesToIndex, initializeMaze } from "../util"
-import * as THREE from "three"
+import { asyncRAF, coordinatesToIndex, getAdjacentNodesCoords, initializeMaze } from "../util"
 import { proxy, snapshot, subscribe } from "valtio"
 import { devtools } from "valtio/utils"
 import { notify } from "./alertQueueStore"
@@ -19,16 +18,14 @@ export type Maze = (Node | null)[]
 export type MazeProxy = {
   nodes: Maze
   searchStaus: SearchStaus
-  isDirty: boolean // if one of the algorithm has been run then isDirty = true
   isMazeEditable: boolean
   rank: number // The dimension of the maze. Ex: a 3x3x3 maze will have a rank of 3
 }
 
 export const mazeProxy = proxy<MazeProxy>({
   rank: 5,
-  nodes: initializeMaze(),
+  nodes: initializeMaze(5),
   searchStaus: "waiting to start",
-  isDirty: false,
   isMazeEditable: true,
 })
 
@@ -100,43 +97,47 @@ export const runDfs = () => {
     return
   }
 
-  const stack = [startNode]
+  const stack: Node[] = [startNode]
   let endNodeFound = false
 
-  function logic() {
-    const currNode = stack.pop()
-    if (!currNode) return
+  const bfs = () =>
+    new Promise(async (res, rej) => {
+      const currNode = stack.pop()
 
-    const { state, position: pos } = currNode
-    if (state === "end") {
-      endNodeFound = true
-      return true
-    }
+      if (!currNode) {
+        if (stack.length > 0 && !endNodeFound) await asyncRAF(bfs)
+        return res("")
+      }
 
-    if (state === "blocked" || state === "visited") {
-      if (stack.length > 0 && !endNodeFound) requestAnimationFrame(logic)
-      return
-    }
+      if (currNode.state === "visited") {
+        if (stack.length > 0 && !endNodeFound) await asyncRAF(bfs)
+        return res("")
+      }
 
-    if (currNode.state !== "start") currNode.state = "visited"
+      if (currNode.state === "end") {
+        endNodeFound = true
+        notify(
+          "Found path between start and end node. End node at " + currNode.position.toString(),
+          "inform"
+        )
+        return res("done")
+      }
 
-    // prettier-ignore
-    const directions = [ [1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1] ]
+      if (currNode.state !== "start") currNode.state = "visited"
 
-    for (const dir of directions) {
-      const vec1 = new THREE.Vector3(...dir)
-      const vec2 = new THREE.Vector3(...pos)
-      const result = vec1.add(vec2).toArray()
+      getAdjacentNodesCoords(currNode.position).forEach((adjNode) => {
+        const node = getNode(adjNode)
+        if (!node) return
+        if (node.state === "open" || node.state === "end") stack.push(node)
+      })
 
-      const node = getNode(result)
-      if (node && (node.state === "end" || node.state === "open")) stack.push(node)
-    }
+      if (stack.length > 0 && !endNodeFound) await asyncRAF(bfs)
+      return res("done")
+    })
 
-    if (stack.length > 0 && !endNodeFound) requestAnimationFrame(logic)
-  }
-
-  startNode.state = "start"
-  requestAnimationFrame(logic)
+  asyncRAF(bfs).then(() => {
+    if (!endNodeFound) notify("No path available between start and end nodes", "alert")
+  })
 }
 
 export const runBfs = () => {
@@ -150,40 +151,44 @@ export const runBfs = () => {
   const q: Node[] = [startNode]
   let endNodeFound = false
 
-  function logic() {
-    const currNode = q.shift()
-    if (!currNode) {
-      if (q.length > 0 && !endNodeFound) requestAnimationFrame(logic)
-      return
-    }
-    if (currNode.state === "visited") {
-      if (q.length > 0 && !endNodeFound) requestAnimationFrame(logic)
-      return
-    }
-    if (currNode.state === "end") {
-      endNodeFound = true
-      return true
-    }
-    if (currNode.state !== "start") setNodeState(currNode.index, "visited")
+  const bfs = () =>
+    new Promise(async (res, rej) => {
+      const currNode = q.shift()
 
-    // prettier-ignore
-    const directions = [ [1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1] ]
+      if (!currNode) {
+        if (q.length > 0 && !endNodeFound) await asyncRAF(bfs)
+        return res("")
+      }
 
-    for (const dir of directions) {
-      const vec1 = new THREE.Vector3(...dir)
-      const vec2 = new THREE.Vector3(...currNode.position)
-      const result = vec1.add(vec2).toArray()
+      if (currNode.state === "visited") {
+        if (q.length > 0 && !endNodeFound) await asyncRAF(bfs)
+        return res("")
+      }
 
-      const node = getNode(result)
-      if (!node) continue
+      if (currNode.state === "end") {
+        endNodeFound = true
+        notify(
+          "Found path between start and end node. End node at " + currNode.position.toString(),
+          "inform"
+        )
+        return res("done")
+      }
 
-      if (node.state === "end" || node.state === "open") q.push(node)
-    }
+      if (currNode.state !== "start") currNode.state = "visited"
 
-    if (q.length > 0 && !endNodeFound) requestAnimationFrame(logic)
-  }
+      getAdjacentNodesCoords(currNode.position).forEach((adjNode) => {
+        const node = getNode(adjNode)
+        if (!node) return
+        if (node.state === "open" || node.state === "end") q.push(node)
+      })
 
-  requestAnimationFrame(logic)
+      if (q.length > 0 && !endNodeFound) await asyncRAF(bfs)
+      return res("done")
+    })
+
+  asyncRAF(bfs).then(() => {
+    if (!endNodeFound) notify("No path available between start and end nodes", "alert")
+  })
 }
 
 if (import.meta.env.DEV) {

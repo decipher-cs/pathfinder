@@ -30,7 +30,7 @@ export const Cubes = () => {
           if (state === "open") return "blue"
           if (state === "blocked") return "purple"
           if (state === "end") return "yellow"
-          if (state === "start") return "red"
+          if (state === "start") return "lime"
           return "black"
         })()
 

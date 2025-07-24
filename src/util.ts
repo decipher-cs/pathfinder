@@ -1,3 +1,4 @@
+import { Vector3 } from "three"
 import { type Position, type Maze, type Node } from "./stores/mazeStore"
 
 export const areArrayEqual = (a: Position, b: Position): boolean =>
@@ -41,4 +42,25 @@ export const initializeMaze = (rank = 5): Maze => {
     }
   }
   return positions
+}
+
+export const getAdjacentNodesCoords = (position: Position): Position[] => {
+  // prettier-ignore
+  const directions = [ [1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1] ]
+  const result = []
+
+  for (const dir of directions) {
+    const vec1 = new Vector3(...dir)
+    const vec2 = new Vector3(...position)
+    result.push(vec1.add(vec2).toArray())
+  }
+  return result
+}
+
+export async function asyncRAF<T>(fn: () => Promise<T>) {
+  return new Promise((res, rej) => {
+    requestAnimationFrame(async () => {
+      res(await fn())
+    })
+  })
 }
