@@ -36,7 +36,7 @@ export const MazeProxy = z.object({
 
 const getLocalStorageData = () => {
   const unsafe = localStorage.getItem("MAZE")
-  const { success, data } = MazeProxy.safeParse(JSON.parse(unsafe ?? ""))
+  const { success, data } = MazeProxy.safeParse(unsafe && JSON.parse(unsafe))
   return success ? data : null
 }
 

@@ -23,7 +23,7 @@ export const UiProxy = z.object({
 
 const getLocalStorageData = () => {
   const unsafe = localStorage.getItem("UI")
-  const { success, data } = UiProxy.safeParse(JSON.parse(unsafe ?? ""))
+  const { success, data } = UiProxy.safeParse(unsafe && JSON.parse(unsafe))
   return success ? data : null
 }
 
