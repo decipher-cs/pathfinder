@@ -1,4 +1,5 @@
-import { proxy } from "valtio"
+import { proxy, subscribe } from "valtio"
+import * as z from "zod"
 
 export const possibleNodeInteractions = [
   "place start node",
@@ -6,22 +7,35 @@ export const possibleNodeInteractions = [
   "block node",
   "open node",
 ] as const
+export const PossibleNodeInteractions = z.enum(possibleNodeInteractions)
+export type PossibleNodeInteractions = z.infer<typeof PossibleNodeInteractions>
 
 export const availableAlgorithms = ["dfs", "bfs"] as const
+export const AvailableAlgorithms = z.enum(availableAlgorithms)
+export type AvailableAlgorithms = z.infer<typeof AvailableAlgorithms>
 
-export type PossibleNodeInteractions = (typeof possibleNodeInteractions)[number]
-export type AvailableAlgorithms = (typeof availableAlgorithms)[number]
+export const UiProxy = z.object({
+  orbitControlsEnabled: z.boolean(),
+  clickBehavior: PossibleNodeInteractions,
+  dragBehavior: PossibleNodeInteractions.extract(["block node", "open node"]),
+  selectedAlgorithm: AvailableAlgorithms,
+})
 
-export type ProxyOptions = {
-  orbitControlsEnabled: boolean
-  clickBehavior: PossibleNodeInteractions
-  dragBehavior: Extract<PossibleNodeInteractions, "block node" | "open node">
-  selectedAlgorithm: AvailableAlgorithms
+const getLocalStorageData = () => {
+  const unsafe = localStorage.getItem("UI")
+  const { success, data } = UiProxy.safeParse(JSON.parse(unsafe ?? ""))
+  return success ? data : null
 }
 
-export const uiProxy = proxy<ProxyOptions>({
-  orbitControlsEnabled: true,
-  clickBehavior: "place start node",
-  dragBehavior: "block node",
-  selectedAlgorithm: availableAlgorithms[1],
+export const uiProxy = proxy<z.infer<typeof UiProxy>>(
+  getLocalStorageData() ?? {
+    orbitControlsEnabled: true,
+    clickBehavior: "place start node",
+    dragBehavior: "block node",
+    selectedAlgorithm: availableAlgorithms[1],
+  }
+)
+
+subscribe(uiProxy, () => {
+  localStorage.setItem("UI", JSON.stringify(uiProxy))
 })

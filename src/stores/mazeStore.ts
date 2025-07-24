@@ -2,32 +2,52 @@ import { asyncRAF, coordinatesToIndex, getAdjacentNodesCoords, initializeMaze } 
 import { proxy, snapshot, subscribe } from "valtio"
 import { devtools } from "valtio/utils"
 import { notify } from "./alertQueueStore"
+import * as z from "zod"
 
-export type SearchStaus = "searching" | "path found" | "path not found" | "waiting to start"
-export type Position = readonly [x: number, y: number, z: number]
-export type State = "blocked" | "open" | "start" | "end" | "visited"
-export type PossibleAlgorithms = "dfs" | "bfs"
+// prettier-ignore
+export const SearchStaus = z.literal(["searching", "path found", "path not found", "waiting to start"])
+export type SearchStaus = z.infer<typeof SearchStaus>
 
-export type Node = {
-  position: Position
-  state: State
-  index: number
-}
-export type Maze = (Node | null)[]
+export const Position = z.tuple([z.number(), z.number(), z.number()]).readonly()
+export type Position = z.infer<typeof Position>
 
-export type MazeProxy = {
-  nodes: Maze
-  searchStaus: SearchStaus
-  isMazeEditable: boolean
-  rank: number // The dimension of the maze. Ex: a 3x3x3 maze will have a rank of 3
-}
+export const State = z.literal(["blocked", "open", "start", "end", "visited"])
+export type State = z.infer<typeof State>
 
-export const mazeProxy = proxy<MazeProxy>({
-  rank: 5,
-  nodes: initializeMaze(5),
-  searchStaus: "waiting to start",
-  isMazeEditable: true,
+export const PossibleAlgorithms = z.literal(["dfs", "bfs"])
+export type PossibleAlgorithms = z.infer<typeof PossibleAlgorithms>
+
+export const Node = z.object({
+  position: Position,
+  state: State,
+  index: z.number(),
 })
+export type Node = z.infer<typeof Node>
+
+export const Maze = z.array(Node.nullable())
+export type Maze = z.infer<typeof Maze>
+
+export const MazeProxy = z.object({
+  nodes: Maze,
+  searchStaus: SearchStaus,
+  isMazeEditable: z.boolean(),
+  rank: z.number(), // The dimension of the maze. Ex: a 3x3x3 maze will have a rank of 3
+})
+
+const getLocalStorageData = () => {
+  const unsafe = localStorage.getItem("MAZE")
+  const { success, data } = MazeProxy.safeParse(JSON.parse(unsafe ?? ""))
+  return success ? data : null
+}
+
+export const mazeProxy = proxy<z.infer<typeof MazeProxy>>(
+  getLocalStorageData() ?? {
+    rank: 5,
+    nodes: initializeMaze(5),
+    searchStaus: "waiting to start",
+    isMazeEditable: true,
+  }
+)
 
 export const getNode = (arg: Position | number) => {
   if (typeof arg === "number") {
@@ -199,8 +219,13 @@ if (import.meta.env.DEV) {
   })
 
   // Put a start and end node for easy develpment
-  let node = mazeProxy.nodes.at(-1)
-  if (node) node.state = "end"
-  node = mazeProxy.nodes.at(0)
-  if (node) node.state = "start"
+  // let node = mazeProxy.nodes.at(-1)
+  // if (node) node.state = "end"
+  // node = mazeProxy.nodes.at(0)
+  // if (node) node.state = "start"
 }
+
+// Sync with localStorage
+subscribe(mazeProxy, () => {
+  localStorage.setItem("MAZE", JSON.stringify(mazeProxy))
+})
