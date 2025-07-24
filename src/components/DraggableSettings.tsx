@@ -8,6 +8,7 @@ import {
 } from "../stores/uiStore"
 import GripHorizontalIcon from "../assets/grab-handles.svg"
 import * as mazeProxy from "../stores/mazeStore"
+import { initializeMaze } from "../util"
 
 export const DraggableSettings = () => {
   const [position, setPosition] = useState({ x: 10, y: 10 })
@@ -44,6 +45,7 @@ export const DraggableSettings = () => {
   }
 
   const { dragBehavior, clickBehavior, selectedAlgorithm } = useSnapshot(uiProxy)
+  const { rank } = useSnapshot(mazeProxy.mazeProxy)
 
   return (
     <div
@@ -156,6 +158,26 @@ export const DraggableSettings = () => {
             </label>
           ))}
         </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Select maze dimensions</legend>
+
+        <input
+          type="number"
+          min={3}
+          max={15}
+          value={rank}
+          onChange={(e) => {
+            const rawVal = Number(e.target.value)
+            let val = 5
+            if (typeof rawVal !== "number" || rawVal < 3 || rawVal > 15) val = val
+            else val = rawVal
+
+            mazeProxy.mazeProxy.rank = val
+            mazeProxy.mazeProxy.nodes = initializeMaze(val)
+          }}
+        />
       </fieldset>
     </div>
   )

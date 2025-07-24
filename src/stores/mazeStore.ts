@@ -217,12 +217,6 @@ if (import.meta.env.DEV) {
   subscribe(mazeProxy, () => {
     // console.log(mazeProxy.isMazeEditable)
   })
-
-  // Put a start and end node for easy develpment
-  // let node = mazeProxy.nodes.at(-1)
-  // if (node) node.state = "end"
-  // node = mazeProxy.nodes.at(0)
-  // if (node) node.state = "start"
 }
 
 // Sync with localStorage
