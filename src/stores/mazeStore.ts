@@ -5,7 +5,7 @@ import { notify } from "./alertQueueStore"
 import * as z from "zod"
 
 // prettier-ignore
-export const SearchStaus = z.literal(["searching", "path found", "path not found", "waiting to start"])
+export const SearchStaus = z.literal(["searching", "path found", "path not found", "waiting to start", "loading"])
 export type SearchStaus = z.infer<typeof SearchStaus>
 
 export const Position = z.tuple([z.number(), z.number(), z.number()]).readonly()
@@ -108,6 +108,11 @@ export const setIsMazeEditable = (is: boolean) => (mazeProxy.isMazeEditable = is
 export const getStartNode = () => mazeProxy.nodes.find((node) => node?.state === "start")
 
 export const getEndNode = () => mazeProxy.nodes.find((node) => node?.state === "end")
+
+export const resizeMaze = (rank: number) => {
+  mazeProxy.nodes.length = 0
+  mazeProxy.nodes.push(...initializeMaze(rank))
+}
 
 export const runDfs = () => {
   const startNode = getStartNode()

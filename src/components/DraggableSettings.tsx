@@ -8,13 +8,13 @@ import {
 } from "../stores/uiStore"
 import GripHorizontalIcon from "../assets/grab-handles.svg"
 import * as mazeProxy from "../stores/mazeStore"
-import { initializeMaze } from "../util"
 
 export const DraggableSettings = () => {
   const [position, setPosition] = useState({ x: 10, y: 10 })
   const offsetRef = useRef({ x: 0, y: 0 })
   const isDragging = useRef(false)
 
+  // TODO: optimize: wrap in useCallback
   const handleMouseDown: MouseEventHandler<HTMLDivElement> = (e) => {
     const rect = e.currentTarget.getBoundingClientRect()
 
@@ -164,6 +164,7 @@ export const DraggableSettings = () => {
         <legend>Select maze dimensions</legend>
 
         <input
+          name="dimension"
           type="number"
           min={3}
           max={15}
@@ -175,7 +176,9 @@ export const DraggableSettings = () => {
             else val = rawVal
 
             mazeProxy.mazeProxy.rank = val
-            mazeProxy.mazeProxy.nodes = initializeMaze(val)
+          }}
+          onBlur={() => {
+            mazeProxy.resizeMaze(mazeProxy.mazeProxy.rank)
           }}
         />
       </fieldset>
