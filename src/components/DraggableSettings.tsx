@@ -71,10 +71,8 @@ export const DraggableSettings = () => {
 
   const handleCollapse = () => setCollapsed((p) => !p)
 
-  const { dragBehavior, clickBehavior, selectedAlgorithm, gap, ambientLight } = useSnapshot(
-    uiProxy,
-    { sync: true }
-  )
+  const { dragBehavior, clickBehavior, selectedAlgorithm, gap, ambientLight, soundOn } =
+    useSnapshot(uiProxy, { sync: true })
 
   const { rank } = useSnapshot(mazeProxy.mazeProxy)
 
@@ -124,6 +122,18 @@ export const DraggableSettings = () => {
           const rawVal = Number(e.target.value)
           if (typeof rawVal !== "number" || rawVal < 0 || rawVal > 2) return
           uiProxy.ambientLight = rawVal
+        },
+      },
+    },
+    {
+      label: "Sound On",
+      inputProps: {
+        id: "Sound On",
+        type: "checkbox",
+        checked: soundOn,
+        onChange: (e) => {
+          const checked = e.target.checked
+          uiProxy.soundOn = checked
         },
       },
     },
@@ -291,7 +301,7 @@ export const DraggableSettings = () => {
               <label htmlFor={label} className="capitalize">
                 {label}
               </label>
-              <input {...inputProps} type="number" className="py rounded-sm bg-neutral-200 px-2" />
+              <input type="number" {...inputProps} className="py rounded-sm bg-neutral-200 px-2" />
             </div>
           ))}
         </div>
