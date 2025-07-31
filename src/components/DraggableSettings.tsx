@@ -140,7 +140,7 @@ export const DraggableSettings = () => {
           clsx(isCollapsed ? "h-0 py-0" : "h-auto py-3"),
           "max-h-full overflow-y-scroll px-3 accent-neutral-700"
         )}
-        style={{ transition: "all 0.2s ease" }}
+        style={{ transition: "height 0.2s linear, padding 0.2s linear" }}
       >
         <div className="mb-4 flex flex-wrap place-content-center gap-2">
           <Button onClick={() => mazeProxy.logMaze()}>Log</Button>
