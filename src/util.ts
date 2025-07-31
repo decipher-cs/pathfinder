@@ -41,7 +41,7 @@ export const initializeMaze = (rank = 5): Maze => {
       }
     }
   }
-  return positions
+  return proxy(positions)
 }
 
 export const getAdjacentNodesCoords = (position: Position): Position[] => {
