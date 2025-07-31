@@ -76,9 +76,14 @@ const Scene = () => {
         />
       )}
 
-      <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
+      <GizmoHelper alignment="bottom-right" margin={[80, 80]} renderPriority={2}>
         <GizmoViewport axisColors={["#9d4b4b", "#2f7f4f", "#3b5b9d"]} labelColor="white" />
       </GizmoHelper>
+
+      {/* Postprocessing bloom */}
+      <EffectComposer>
+        <Bloom luminanceThreshold={0.2} luminanceSmoothing={0.9} height={300} />
+      </EffectComposer>
     </>
   )
 }
