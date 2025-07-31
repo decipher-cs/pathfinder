@@ -33,6 +33,9 @@ export const uiProxy = proxy<z.infer<typeof UiProxy>>(
     clickBehavior: "place start node",
     dragBehavior: "block node",
     selectedAlgorithm: availableAlgorithms[1],
+    showGridLines: true,
+    gap: 1.1,
+    ambientLight: 0.1
   }
 )
 
