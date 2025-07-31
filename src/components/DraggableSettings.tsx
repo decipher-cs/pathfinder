@@ -71,8 +71,15 @@ export const DraggableSettings = () => {
 
   const handleCollapse = () => setCollapsed((p) => !p)
 
-  const { dragBehavior, clickBehavior, selectedAlgorithm, gap, ambientLight, soundOn } =
-    useSnapshot(uiProxy, { sync: true })
+  const {
+    dragBehavior,
+    clickBehavior,
+    selectedAlgorithm,
+    gap,
+    ambientLight,
+    soundOn,
+    showGridLines,
+  } = useSnapshot(uiProxy, { sync: true })
 
   const { rank } = useSnapshot(mazeProxy.mazeProxy)
 
@@ -134,6 +141,18 @@ export const DraggableSettings = () => {
         onChange: (e) => {
           const checked = e.target.checked
           uiProxy.soundOn = checked
+        },
+      },
+    },
+    {
+      label: "Show Grid Lines",
+      inputProps: {
+        id: "Show Grid Lines",
+        type: "checkbox",
+        checked: showGridLines,
+        onChange: (e) => {
+          const checked = e.target.checked
+          uiProxy.showGridLines = checked
         },
       },
     },

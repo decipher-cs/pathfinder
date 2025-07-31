@@ -30,6 +30,8 @@ function App() {
       </div>
       <Alerts />
       <DraggableSettings />
+
+      {import.meta.env.DEV && <Stats />}
     </main>
   )
 }
@@ -39,25 +41,28 @@ const Scene = () => {
 
   return (
     <>
-      {import.meta.env.DEV && <Stats />}
       <OrbitControls enableRotate={orbitControlsEnabled} enableDamping={true} makeDefault />
-      <ambientLight />
+
+      <ambientLight intensity={ambientLight} />
+
       <Cubes />
 
-      <Grid
-        position={[0, -0.01, 0]}
-        receiveShadow
-        args={[10.5, 10.5]}
-        infiniteGrid
-        fadeDistance={50}
-        fadeStrength={1}
-        sectionColor={"#a78bfa"}
-        sectionSize={4}
-        sectionThickness={1.5}
-        cellColor={"#f5f3ff"}
-        cellSize={1}
-        cellThickness={1}
-      />
+      {showGridLines && (
+        <Grid
+          position={[0, 0, 0]}
+          receiveShadow
+          args={[10, 10]}
+          infiniteGrid
+          fadeDistance={50}
+          fadeStrength={1}
+          sectionColor={"#9d4b4b"}
+          sectionSize={4}
+          sectionThickness={1.5}
+          cellSize={1}
+          cellThickness={1}
+          side={2}
+        />
+      )}
 
       <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
         <GizmoViewport axisColors={["#9d4b4b", "#2f7f4f", "#3b5b9d"]} labelColor="white" />
