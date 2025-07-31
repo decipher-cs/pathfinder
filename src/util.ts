@@ -1,5 +1,6 @@
 import { Vector3 } from "three"
 import { type Position, type Maze, type Node } from "./stores/mazeStore"
+import { proxy } from "valtio"
 
 export const areArrayEqual = (a: Position, b: Position): boolean =>
   a[0] === b[0] && a[1] === b[1] && a[2] === b[2]
@@ -27,7 +28,6 @@ export const initializeMaze = (rank = 5): Maze => {
         const isSurface =
           x === 0 || x === rank - 1 || y === 0 || y === rank - 1 || z === 0 || z === rank - 1
 
-        console.log()
         if (isSurface) {
           const obj = {
             position: [x, y, z] as const,
@@ -35,7 +35,7 @@ export const initializeMaze = (rank = 5): Maze => {
             index: coordinatesToIndex([x, y, z], rank),
           } satisfies Node
           const i = coordinatesToIndex([x, y, z], rank)
-          positions[i] = obj
+          positions[i] = proxy(obj)
           index++
         }
       }
