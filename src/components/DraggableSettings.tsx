@@ -14,31 +14,50 @@ import Button from "./Button"
 
 export const DraggableSettings = () => {
   const [position, setPosition] = useState({ x: 10, y: 10 })
-  const offsetRef = useRef({ x: 0, y: 0 })
+  // Store properties of the element used for dragging and the parent element that is being dragged.
+  // settingsPanel is the element being dragged. Height/width are stored to make sure element cannot
+  // be dragged beyond the inner dimensions of the viewport.
+  // Offset is the distance between the settings panel and the coordinates of the cursor inside the said
+  // panel when the first mouse down event fires.
+  const dragStateRef = useRef({
+    offsetX: 0,
+    offsetY: 0,
+    settingPanelWidth: 0,
+    settingPanelHeight: 0,
+  })
   const isDragging = useRef(false)
 
   // TODO: optimize: wrap in useCallback
   const handleMouseDown: MouseEventHandler<HTMLDivElement> = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect()
+    const rectEl = e.currentTarget.getBoundingClientRect()
+    const parent = e.currentTarget.parentElement?.parentElement
 
-    offsetRef.current = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
+    dragStateRef.current = {
+      offsetX: e.clientX - rectEl.left,
+      offsetY: e.clientY - rectEl.top,
+      settingPanelWidth: parent?.clientWidth ?? 0,
+      settingPanelHeight: parent?.clientHeight ?? 0,
     }
 
     isDragging.current = true
 
     document.addEventListener("mousemove", handleMouseMove)
-
     document.addEventListener("mouseup", handleMouseUp)
   }
 
   const handleMouseMove = (e: MouseEvent) => {
     if (!isDragging.current) return
-    setPosition({
-      x: e.clientX - offsetRef.current.x,
-      y: e.clientY - offsetRef.current.y,
-    })
+
+    const x = e.clientX - dragStateRef.current.offsetX
+    const y = e.clientY - dragStateRef.current.offsetY
+
+    const screenEdgeX = window.innerWidth
+    const screenEdgeY = window.innerHeight
+
+    setPosition((prev) => ({
+      x: dragStateRef.current.settingPanelWidth + x > screenEdgeX || x < 0 ? prev.x : x,
+      y: dragStateRef.current.settingPanelHeight + y > screenEdgeY || y < 0 ? prev.y : y,
+    }))
   }
 
   const handleMouseUp = () => {
