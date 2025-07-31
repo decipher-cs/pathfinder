@@ -23,8 +23,21 @@ export const Cubes = memo(() => {
     uiProxy.orbitControlsEnabled = false
   }, [])
 
+  const instancesRef = useRef<ComponentRef<typeof Instances>>(null)
+
+  const { isIdle } = useIdleTracker()
+
+  useFrame(({}, delta) => {
+    const el = instancesRef.current
+    if (!el) return
+
+    if (isIdle) el.rotation.y += delta * 0.1
+    else el.rotation.y = 0
+  })
+
   return (
     <Instances
+      ref={instancesRef}
       position={[0, 3, 0]}
       limit={100_000}
       onPointerDown={handlePointDown}
