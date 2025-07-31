@@ -19,6 +19,9 @@ export const UiProxy = z.object({
   clickBehavior: PossibleNodeInteractions,
   dragBehavior: PossibleNodeInteractions.extract(["block node", "open node"]),
   selectedAlgorithm: AvailableAlgorithms,
+  showGridLines: z.boolean(),
+  gap: z.number(),
+  ambientLight: z.number(),
 })
 
 const getLocalStorageData = () => {
