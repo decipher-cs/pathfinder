@@ -36,11 +36,10 @@ export const Cubes = () => {
 }
 Cubes.displayName = "Cubes"
 
-const gap = 1.1
-
 const NodeInstance = memo(({ data: { index, position, state } }: { data: Node }) => {
+  const { gap } = useSnapshot(uiProxy)
   const [x, y, z] = position
-  const pos = useMemo(() => [x * gap, y * gap, z * gap] as const, [x, y, z])
+  const pos = [x * gap, y * gap, z * gap] as const
 
   const color = STATE_COLORS[state] ?? "black"
 
