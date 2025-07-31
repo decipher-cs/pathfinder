@@ -2,19 +2,20 @@ import { useSnapshot } from "valtio"
 import { uiProxy } from "../stores/uiStore"
 import * as mazeActions from "../stores/mazeStore"
 import { mazeProxy, type Node, type State } from "../stores/mazeStore"
-import { Instance, Instances } from "@react-three/drei"
-import { memo, useCallback, useMemo, type MouseEventHandler, type PointerEventHandler } from "react"
-import type { ThreeEvent } from "@react-three/fiber"
+import { Edges, Instance, Instances } from "@react-three/drei"
+import { memo, useCallback, useRef, type ComponentRef, type MouseEventHandler } from "react"
+import { useFrame, type ThreeEvent } from "@react-three/fiber"
+import useIdleTracker from "../hooks/useIdleTracker"
 
-const STATE_COLORS: Record<State, string> = {
-  visited: "red",
-  open: "blue",
-  blocked: "purple",
-  end: "yellow",
-  start: "lime",
+const STATE_COLORS: Record<State, string | [number, number, number]> = {
+  open: "#fff",
+  blocked: "#303035",
+  end: [7, 17, 17],
+  start: [17, 17, 7],
+  visited: [15, 7.5, 7.5],
 }
 
-export const Cubes = () => {
+export const Cubes = memo(() => {
   const nodes = useSnapshot(mazeProxy.nodes)
 
   const handlePointDown = useCallback((e: ThreeEvent<PointerEvent>) => {
@@ -23,7 +24,11 @@ export const Cubes = () => {
   }, [])
 
   return (
-    <Instances limit={100_000} onPointerDown={handlePointDown}>
+    <Instances
+      position={[0, 3, 0]}
+      limit={100_000}
+      onPointerDown={handlePointDown}
+    >
       <boxGeometry />
       <meshStandardMaterial />
 
@@ -33,7 +38,7 @@ export const Cubes = () => {
       })}
     </Instances>
   )
-}
+})
 Cubes.displayName = "Cubes"
 
 const NodeInstance = memo(({ data: { index, position, state } }: { data: Node }) => {
