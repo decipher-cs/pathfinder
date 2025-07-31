@@ -55,8 +55,8 @@ const NodeInstance = memo(({ data: { index, position, state } }: { data: Node })
     [index]
   )
 
-  const handlePointer: PointerEventHandler = useCallback(
-    (e) => {
+  const handlePointer = useCallback(
+    (e: ThreeEvent<PointerEvent>) => {
       e.stopPropagation()
 
       // Checking for orbitControls enabled is important!
@@ -73,68 +73,16 @@ const NodeInstance = memo(({ data: { index, position, state } }: { data: Node })
   )
 
   return (
-    <Instance
-      color={color}
-      scale={1}
-      position={pos}
-      onClick={handleClick}
-      onPointerOver={handlePointer}
-    />
+    <>
+      <Instance
+        color={color}
+        scale={1}
+        position={pos}
+        onClick={handleClick}
+        onPointerOver={handlePointer}
+      />
+      <Edges linewidth={1} scale={1} position={pos} threshold={90} color="#9d4b4b" />
+    </>
   )
 })
 NodeInstance.displayName = "NodeInstance"
-
-// Use this if you want the state of each node to exist in the child.
-// Considerebly slows down creation of new maze when the dimension changes
-// and app needs to resize the current cube but the benifit is that
-// the parent does not re-render for every change in the child
-//
-// const NodeInstance = memo(({ index }: { index: number }) => {
-//   const nodes = useSnapshot(mazeProxy.nodes, { sync: true })
-//   const node = nodes.at(index)
-//   const state = node?.state ?? "open"
-//   const position = node?.position ?? ([0, 0, 0] as const)
-//   const gap = 1.1
-//   const [x, y, z] = position
-//
-//   const color = STATE_COLORS[state] ?? "black"
-//
-//   const handleClick: MouseEventHandler = useCallback(
-//     (e) => {
-//       e.stopPropagation()
-//       if (uiProxy.clickBehavior === "open node") mazeActions.setNodeState(index, "open")
-//       else if (uiProxy.clickBehavior === "place end node") mazeActions.setNodeStateToEnd(index)
-//       else if (uiProxy.clickBehavior === "block node") mazeActions.setNodeState(index, "blocked")
-//       else if (uiProxy.clickBehavior === "place start node") mazeActions.setNodeStateToStart(index)
-//     },
-//     [index]
-//   )
-//
-//   const handlePointer: PointerEventHandler = useCallback(
-//     (e) => {
-//       e.stopPropagation()
-//
-//       // Checking for orbitControls enabled is important!
-//       // This event will fire when pointer is over a node while rotating the scene
-//       // When that happens, it will trigger the drag behavior which is not desired
-//       // because the intention was to rotate the scene and not cause the hover action.
-//       // btn != 1 for when left btn is not held down i.e. user is not dragging pointer.
-//       if (uiProxy.orbitControlsEnabled || e.buttons !== 1) return
-//
-//       if (uiProxy.dragBehavior === "block node") mazeActions.setNodeState(index, "blocked")
-//       else if (uiProxy.dragBehavior === "open node") mazeActions.setNodeState(index, "open")
-//     },
-//     [position]
-//   )
-//
-//   if (!node) return null
-//   return (
-//     <Instance
-//       color={color}
-//       scale={1}
-//       position={[x * gap, y * gap, z * gap]}
-//       onClick={handleClick}
-//       onPointerOver={handlePointer}
-//     />
-//   )
-// })
