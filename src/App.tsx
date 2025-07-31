@@ -1,20 +1,21 @@
-// prettier-ignore
-import { GizmoHelper, GizmoViewport, Grid, OrbitControls, Text, Stats } from "@react-three/drei"
+import { GizmoHelper, GizmoViewport, Grid, OrbitControls, Stats, Text } from "@react-three/drei"
 import { Canvas } from "@react-three/fiber"
 import { uiProxy } from "./stores/uiStore"
-import { Suspense } from "react"
+import { Suspense, useEffect, useRef } from "react"
 import { useSnapshot } from "valtio"
 import { DraggableSettings } from "./components/DraggableSettings"
 import { Alerts } from "./components/Alerts"
 import { Cubes } from "./components/CubeInstances"
+import { EffectComposer, Bloom } from "@react-three/postprocessing"
+import sound from "./assets/sounds/startup.mp3"
 
 function App() {
   return (
-    <main className="min-w-full min-h-svh bg-gray-500 grid *:outline grid-rows-[1fr_auto] grid-cols-1">
+    <main className="grid min-h-svh min-w-full grid-cols-1 grid-rows-[1fr_auto] bg-[#303035]">
       <div className="">
         <Canvas
           gl={{ antialias: true }}
-          camera={{ position: [0, 0, 20] }}
+          camera={{ position: [2, 10, 15] }}
           onPointerUp={() => (uiProxy.orbitControlsEnabled = true)}
         >
           <Suspense
@@ -37,7 +38,18 @@ function App() {
 }
 
 const Scene = () => {
-  const { orbitControlsEnabled } = useSnapshot(uiProxy)
+  const audioRef = useRef<HTMLAudioElement>(null)
+  if (!audioRef?.current) audioRef.current = new Audio(sound)
+
+  const { orbitControlsEnabled, showGridLines, ambientLight } = useSnapshot(uiProxy)
+
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.volume = 0.5
+    const res = audioRef.current?.play()
+
+    // supress the "play() failed because the user didn't interact with the document first" error
+    res?.catch(() => {})
+  }, [])
 
   return (
     <>
