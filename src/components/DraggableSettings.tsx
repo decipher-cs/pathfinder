@@ -13,7 +13,8 @@ import { ChevronsDownUpIcon, ChevronsUpDownIcon, HandIcon } from "lucide-react"
 import Button from "./Button"
 
 export const DraggableSettings = () => {
-  const [position, setPosition] = useState({ x: 10, y: 10 })
+  const [position, setPosition] = useState({ x: 3, y: 3 })
+
   // Store properties of the element used for dragging and the parent element that is being dragged.
   // settingsPanel is the element being dragged. Height/width are stored to make sure element cannot
   // be dragged beyond the inner dimensions of the viewport.
@@ -133,7 +134,7 @@ export const DraggableSettings = () => {
 
   return (
     <div
-      className={"absolute z-50 w-[40ch] overflow-auto rounded-xl bg-neutral-300 shadow-2xl"}
+      className={"absolute z-50 w-[40ch] overflow-hidden rounded-xl bg-neutral-300 shadow-2xl"}
       style={{
         transform: `translate(${position.x}px, ${position.y}px)`,
         resize: isCollapsed ? "none" : "both",
