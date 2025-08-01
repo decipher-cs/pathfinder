@@ -44,6 +44,7 @@ const Scene = () => {
   const { orbitControlsEnabled, showGridLines, ambientLight } = useSnapshot(uiProxy)
 
   useEffect(() => {
+    if (!uiProxy.soundOn) return
     if (audioRef.current) audioRef.current.volume = 0.5
     const res = audioRef.current?.play()
 
