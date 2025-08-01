@@ -1,11 +1,11 @@
 import { useSnapshot } from "valtio"
 import { alertQProxy } from "../stores/alertQueueStore"
 
-export const Alerts = () => {
+export const Toasts = () => {
   const alerts = useSnapshot(alertQProxy.alerts)
 
   return (
-    <div className="absolute z-50 right-1 top-1 gap-2 flex flex-col max-w-prose">
+    <div className="absolute top-1 right-1 z-50 flex max-w-prose flex-col gap-2">
       {alerts.map(({ message, severity }, i) => {
         const color = (() => {
           if (severity === "inform") return "#3485ff"
@@ -15,7 +15,7 @@ export const Alerts = () => {
         })()
 
         return (
-          <div key={i} className={"p-3 border rounded"} style={{ backgroundColor: color }}>
+          <div key={i} className={"rounded border p-3"} style={{ backgroundColor: color }}>
             {message}
           </div>
         )

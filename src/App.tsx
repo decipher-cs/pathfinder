@@ -12,11 +12,11 @@ import { uiProxy } from "./stores/uiStore"
 import { Suspense, useEffect, useRef, type ComponentRef } from "react"
 import { useSnapshot } from "valtio"
 import { DraggableSettings } from "./components/DraggableSettings"
-import { Alerts } from "./components/Alerts"
 import { Cubes } from "./components/CubeInstances"
 import { EffectComposer, Bloom } from "@react-three/postprocessing"
 import sound from "./assets/sounds/startup.mp3"
 import { idleProxy } from "./stores/idleTrackerStore"
+import { Toasts } from "./components/Toasts"
 
 function App() {
   return (
@@ -38,7 +38,7 @@ function App() {
           </Suspense>
         </Canvas>
       </div>
-      <Alerts />
+      <Toasts />
       <DraggableSettings />
 
       {import.meta.env.DEV && <Stats />}
