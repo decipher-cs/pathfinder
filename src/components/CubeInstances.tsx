@@ -3,9 +3,8 @@ import { uiProxy } from "../stores/uiStore"
 import * as mazeActions from "../stores/mazeStore"
 import { mazeProxy, type Node, type State } from "../stores/mazeStore"
 import { Edges, Instance, Instances } from "@react-three/drei"
-import { memo, useCallback, useRef, type ComponentRef, type MouseEventHandler } from "react"
-import { useFrame, type ThreeEvent } from "@react-three/fiber"
-import useIdleTracker from "../hooks/useIdleTracker"
+import { memo, useCallback, type MouseEventHandler } from "react"
+import { type ThreeEvent } from "@react-three/fiber"
 
 const STATE_COLORS: Record<State, string | [number, number, number]> = {
   open: "#fff",
@@ -23,25 +22,8 @@ export const Cubes = memo(() => {
     uiProxy.orbitControlsEnabled = false
   }, [])
 
-  const instancesRef = useRef<ComponentRef<typeof Instances>>(null)
-
-  const { isIdle } = useIdleTracker()
-
-  useFrame(({}, delta) => {
-    const el = instancesRef.current
-    if (!el) return
-
-    if (isIdle) el.rotation.y += delta * 0.1
-    else el.rotation.y = 0
-  })
-
   return (
-    <Instances
-      ref={instancesRef}
-      position={[0, 3, 0]}
-      limit={100_000}
-      onPointerDown={handlePointDown}
-    >
+    <Instances position={[0, 3, 0]} limit={100_000} onPointerDown={handlePointDown}>
       <boxGeometry />
       <meshStandardMaterial />
 

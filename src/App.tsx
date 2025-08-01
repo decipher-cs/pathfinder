@@ -1,13 +1,22 @@
-import { GizmoHelper, GizmoViewport, Grid, OrbitControls, Stats, Text } from "@react-three/drei"
-import { Canvas } from "@react-three/fiber"
+import {
+  Center,
+  GizmoHelper,
+  GizmoViewport,
+  Grid,
+  OrbitControls,
+  Stats,
+  Text,
+} from "@react-three/drei"
+import { Canvas, useFrame } from "@react-three/fiber"
 import { uiProxy } from "./stores/uiStore"
-import { Suspense, useEffect, useRef } from "react"
+import { Suspense, useEffect, useRef, type ComponentRef } from "react"
 import { useSnapshot } from "valtio"
 import { DraggableSettings } from "./components/DraggableSettings"
 import { Alerts } from "./components/Alerts"
 import { Cubes } from "./components/CubeInstances"
 import { EffectComposer, Bloom } from "@react-three/postprocessing"
 import sound from "./assets/sounds/startup.mp3"
+import { idleProxy } from "./stores/idleTrackerStore"
 
 function App() {
   return (
@@ -52,13 +61,26 @@ const Scene = () => {
     res?.catch(() => {})
   }, [])
 
+  const { isIdle } = useSnapshot(idleProxy)
+
+  const ref = useRef<ComponentRef<typeof Center>>(null)
+  useFrame(({}, delta) => {
+    const el = ref.current
+    if (!el) return
+
+    if (isIdle) el.rotation.y += delta * 0.1
+    else el.rotation.y = 0
+  })
+
   return (
     <>
       <OrbitControls enableRotate={orbitControlsEnabled} enableDamping={true} makeDefault />
 
       <ambientLight intensity={ambientLight} />
 
-      <Cubes />
+      <Center ref={ref} rotateOnAxis={(axis, ang) => {}}>
+        <Cubes />
+      </Center>
 
       {showGridLines && (
         <Grid
