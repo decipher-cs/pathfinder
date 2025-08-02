@@ -27,13 +27,6 @@ export function addAlert(alert: Alert) {
   alertQProxy.alerts.push(alert)
 }
 
-export function notify(
-  msg?: string,
-  severity?: Severity,
-  autoDismiss = true,
-  timeoutIn = 1000 * 8
-) {
+export function notify(msg: string, severity: Severity) {
   addAlert(createAlert(msg, severity))
-
-  if (autoDismiss) setTimeout(removeAlert, timeoutIn)
 }
