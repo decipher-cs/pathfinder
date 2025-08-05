@@ -66,5 +66,5 @@ export async function asyncRAF<T>(fn: () => Promise<T>) {
 }
 
 export function getRandom(max = 100) {
-  return Math.floor(Math.random() * max)
+  return Math.floor(Math.random() * (max + 1))
 }
