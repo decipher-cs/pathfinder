@@ -3,7 +3,7 @@
 
 # Trailblazer v2.0
 
-Faster and cleaner looking implementation of traillblazer v1. Better than its ancestor in every regard.
+Faster and cleaner looking implementation of traillblazer v1. Better than its ancestor in every regard. [Live Demo](https://v2-superseded--path-visualize.netlify.app/)
 
 ## Table of Contents
 
