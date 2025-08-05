@@ -19,7 +19,11 @@ Faster and cleaner looking implementation of traillblazer v1. Better than its an
 
 ## Preview
 
-![preview gif](./public/trailblazer.gif)
+New version:
+![preview video](public/v2-demo.mp4)
+
+Old version:
+![preview gif](public/trailblazer.gif)
 
 ## Features
 
