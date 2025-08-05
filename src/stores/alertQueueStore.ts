@@ -1,8 +1,8 @@
-import { proxy, snapshot, subscribe } from "valtio"
+import { proxy } from "valtio"
 import { getRandom } from "../util"
 
 type Severity = "warn" | "alert" | "inform"
-type Alert = { message: string; severity: Severity }
+export type Alert = { message: string; severity: Severity }
 type AlertQProxy = { alerts: Alert[] }
 
 export const createAlert = (

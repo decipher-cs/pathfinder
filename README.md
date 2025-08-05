@@ -6,7 +6,8 @@
 - [x] Make notification system for error reporting like "start end needs to be set before running algorithm"
 - Look into [violations](https://chromestatus.com/feature/5745543795965952) - Added non-passive event listener to a scroll-blocking 'wheel' event.
 - Add react compiler
-- [ ] Dismiss btn inside toast
+- [x] Dismiss btn inside toast
 - [X] Add bounds to draggable settings
 - [x] Add sound ~when moving cursor along the nodes~
 - [x] Hide/Unhide settings
+- [x] Add animations

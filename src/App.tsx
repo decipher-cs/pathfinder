@@ -78,7 +78,7 @@ const Scene = () => {
 
       <ambientLight intensity={ambientLight} />
 
-      <Center ref={ref} rotateOnAxis={(axis, ang) => {}}>
+      <Center ref={ref}>
         <Cubes />
       </Center>
 
