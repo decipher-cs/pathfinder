@@ -19,17 +19,19 @@ Faster and cleaner looking implementation of traillblazer v1. Better than its an
 
 ## Preview
 
-New version:
-![preview video](public/v2-demo.mp4)
+[New version](public/v2-demo.mp4)
 
-Old version:
-![preview gif](public/trailblazer.gif)
+https://github.com/user-attachments/assets/5c2f0959-d97c-4d7b-bf69-9e833c6d3da6
+
+[Older version](public/trailblazer.gif)
+
+![output](https://github.com/user-attachments/assets/4b785d33-cb51-437e-a397-e107dc1e9768)
+
 
 ## Features
 
 -   Highly performant.
 -   Support for various algorithms.
--   Soft design.
 -   Web workers to free the main thread while solving the 'maze'
 
 ## What has Improved
