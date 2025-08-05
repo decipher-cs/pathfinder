@@ -1,4 +1,10 @@
-import { asyncRAF, coordinatesToIndex, getAdjacentNodesCoords, initializeMaze } from "../util"
+import {
+  asyncRAF,
+  coordinatesToIndex,
+  getAdjacentNodesCoords,
+  getRandom,
+  initializeMaze,
+} from "../util"
 import { proxy, snapshot, subscribe } from "valtio"
 import { devtools } from "valtio/utils"
 import { notify } from "./alertQueueStore"
@@ -112,6 +118,27 @@ export const getEndNode = () => mazeProxy.nodes.find((node) => node?.state === "
 export const resizeMaze = (rank: number) => {
   mazeProxy.nodes.length = 0
   mazeProxy.nodes.push(...initializeMaze(rank))
+}
+
+export const randomizeMaze = () => {
+  mazeProxy.nodes.forEach((node, i) => {
+    if (!node) return
+    const rand = getRandom(1)
+    node.state = rand === 1 ? "blocked" : "open"
+  })
+
+  // Recursively find index for a valid node
+  function getValidNode() {
+    const i = getRandom(mazeProxy.nodes.length - 1)
+    const node = getNode(i)
+    if (!node) return getValidNode()
+    return i
+  }
+  const a = getValidNode()
+  const b = getValidNode()
+
+  setNodeState(a, "start")
+  setNodeState(b, "end")
 }
 
 export const runDfs = () => {

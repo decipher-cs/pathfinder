@@ -193,6 +193,7 @@ export const DraggableSettings = () => {
       >
         <div className="mb-4 flex flex-wrap place-content-center gap-2">
           <Button onClick={() => mazeProxy.logMaze()}>Log</Button>
+          <Button onClick={() => mazeProxy.randomizeMaze()}>Randomize</Button>
           <Button
             onClick={() => {
               mazeProxy.mazeProxy.nodes.forEach((node) => {
