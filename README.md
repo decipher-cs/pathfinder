@@ -1,12 +1,15 @@
+> [!IMPORTANT]  
+> Superseded by a new implementation which uses three.js and valtio. Check the main branch.
+
 # Trailblazer v2.0
 
-Faster and cleaner looking implementation of trainlblazer v1. Better than its ancestor in every regard.
+Faster and cleaner looking implementation of traillblazer v1. Better than its ancestor in every regard.
 
 ## Table of Contents
 
 -   [Preview](#)
 -   [Features](#)
--   [Whats Improved](#)
+-   [What has Improved](#)
 -   [Installation](#)
 -   [Tech Used](#tech-used)
 -   [Goals](#)
@@ -20,15 +23,15 @@ Faster and cleaner looking implementation of trainlblazer v1. Better than its an
 
 ## Features
 
--   Highly performent.
+-   Highly performant.
 -   Support for various algorithms.
 -   Soft design.
 -   Web workers to free the main thread while solving the 'maze'
 
-## Whats Improved
+## What has Improved
 
 -   Added framer motion for better animation
--   Included zustand for state managment
+-   Included zustand for state management
 
 ## Installation
 
@@ -48,7 +51,7 @@ Faster and cleaner looking implementation of trainlblazer v1. Better than its an
 -   [x] Support dynamic sized grids.
 -   [x] Improve recursive DFS algorithm using DP.
 -   [ ] Respect user's "prefers-reduced-motion" settings using useReducedMotion from framer-motion.
--   [ ] Add new input to tweek the chances of a wall getting places when running `Math.floor(Math.random() * 3.5)`. Replace `3.5` with variable.
+-   [ ] Add new input to tweak the chances of a wall getting places when running `Math.floor(Math.random() * 3.5)`. Replace `3.5` with variable.
 
 ## Known Issues
 
@@ -59,7 +62,7 @@ Faster and cleaner looking implementation of trainlblazer v1. Better than its an
 -   [Texicab Geometry](https://en.wikipedia.org/wiki/Taxicab_geometry)
 -   [Astar search algorithm](https://briangrinstead.com/blog/astar-search-algorithm-in-javascript/)
 -   [CSS dot pattern background](https://codepen.io/edmundojr/pen/xOYJGw)
--   You can destructure using commans. [[, , value]](https://github.com/microsoft/TypeScript/issues/10571#issuecomment-242913490)
+-   You can destructure using commas. [[, , value]](https://github.com/microsoft/TypeScript/issues/10571#issuecomment-242913490)
 
 ## License
 
