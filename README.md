@@ -6,6 +6,10 @@ A 3D pathfinder. Select a start and end point and choose an algorithm to find th
 
 Newer version
 
+
+https://github.com/user-attachments/assets/e3f1814a-26a2-4596-939e-e242104d6660
+
+
 Previous version
 
 https://github.com/user-attachments/assets/5c2f0959-d97c-4d7b-bf69-9e833c6d3da6
