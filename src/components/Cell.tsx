@@ -1,7 +1,7 @@
 import { Box, CircularProgress } from '@mui/material'
 import { motion } from 'framer-motion'
 import { memo } from 'react'
-import { Cell } from '../types'
+import { type Cell } from '../types'
 import { useGridConfig } from '../stateStore/gridConfigStore'
 import { useShallow } from 'zustand/react/shallow'
 
