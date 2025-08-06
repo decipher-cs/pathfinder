@@ -14,7 +14,7 @@ export const Toasts = () => {
   const alerts = useSnapshot(alertQProxy.alerts)
 
   return (
-    <ul className="absolute top-0 right-3 z-50 flex max-h-svh max-w-prose flex-col items-end gap-5 overflow-hidden">
+    <ul className="absolute top-3 right-3 z-50 flex max-h-svh max-w-prose flex-col items-end gap-5 overflow-hidden">
       {alerts.map((alert, i) => (
         <Toast {...alert} index={i} key={i} />
       ))}
@@ -26,7 +26,7 @@ export const Toast = memo(({ message, severity, index }: { index: number } & Ale
   return (
     <li
       className={
-        "test relative flex w-fit translate-x-0 items-center justify-between gap-8 rounded-lg border bg-white px-5 py-2 text-lg transition-[translate] starting:translate-x-full"
+        "relative flex w-fit translate-x-0 items-center justify-between gap-8 rounded-lg border bg-white px-7 py-4 text-lg transition-[translate] starting:translate-x-full"
       }
     >
       <p className="">{message}</p>
