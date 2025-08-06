@@ -39,8 +39,9 @@ export default function Modal() {
 
       <Instructions />
 
-      <div className="ml-auto flex items-center gap-3">
-        <label autoFocus className="flex gap-1">
+      <hr />
+      <div className="flex items-center justify-between gap-3">
+        <label autoFocus className="flex gap-2">
           <span>Show the instructions again</span>
           <input
             type="checkbox"
@@ -60,7 +61,7 @@ export default function Modal() {
 
 const Instructions = () => {
   return (
-    <article className="overflow-y-scroll">
+    <article className="prose overflow-y-scroll">
       <h2>🖱️ Navigating the 3D Scene</h2>
       <ul>
         <li>
@@ -143,8 +144,6 @@ const Instructions = () => {
         <li>Dragging with the left mouse button speeds up placing or removing multiple nodes.</li>
         <li>Try different cube sizes and layouts to see how performance and behavior change.</li>
       </ul>
-
-      <p>Enjoy visualizing pathfinding in 3D! 🧩</p>
     </article>
   )
 }
