@@ -4,13 +4,13 @@ A 3D pathfinder. Select a start and end point and choose an algorithm to find th
 
 ## Preview
 
-Newer version
+Newer version [Live Demo](https://path-visualize.netlify.app/)
 
 
 https://github.com/user-attachments/assets/e3f1814a-26a2-4596-939e-e242104d6660
 
 
-Previous version
+Previous version [Live Demo](https://v2-superseded--path-visualize.netlify.app/)
 
 https://github.com/user-attachments/assets/5c2f0959-d97c-4d7b-bf69-9e833c6d3da6
 
@@ -21,6 +21,13 @@ https://github.com/user-attachments/assets/5c2f0959-d97c-4d7b-bf69-9e833c6d3da6
 ## Tech
 
 Typescript, React, Vite, Valtio, Tailwind, Three.js, React Three Fiber, React Three Drei
+
+## Features
+
+- Persistent local storage
+- Customizable size
+- 3D experience with three.js
+- Multiple algorithms
 
 ## To-Do
 
