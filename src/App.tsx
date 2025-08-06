@@ -80,7 +80,7 @@ const Scene = () => {
 
       <ambientLight intensity={ambientLight} />
 
-      <Center ref={ref}>
+      <Center ref={ref} top>
         <Cubes />
       </Center>
 
