@@ -33,7 +33,7 @@ export default function Modal() {
       className="top-1/2 z-50 mx-auto grid max-h-11/12 max-w-[70ch] -translate-y-1/2 grid-rows-[min-content_1fr_min-content] gap-3 rounded-lg bg-neutral-200 p-2 backdrop:backdrop-blur-sm backdrop:backdrop-grayscale-100 sm:p-4"
     >
       <h1 className="text-lg font-semibold sm:text-2xl">
-        Instructions
+        ⭐ Instructions ⭐
         <hr />
       </h1>
 
@@ -51,7 +51,9 @@ export default function Modal() {
           />
         </label>
 
-        <Button className="sm:px-10" onClick={() => setOpen(false)}>Close</Button>
+        <Button className="sm:px-10" onClick={() => setOpen(false)}>
+          Close
+        </Button>
       </div>
     </dialog>,
 
@@ -61,7 +63,12 @@ export default function Modal() {
 
 const Instructions = () => {
   return (
-    <article className="prose overflow-y-scroll">
+    <article
+      className="prose-sm sm:prose-md overflow-y-scroll px-1 pt-4 pb-15"
+      style={{
+        mask: "linear-gradient(rgb(0,0,0,100%) 80%,transparent 100%)",
+      }}
+    >
       <h2>🖱️ Navigating the 3D Scene</h2>
       <ul>
         <li>
