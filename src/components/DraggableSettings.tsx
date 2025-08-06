@@ -178,6 +178,7 @@ export const DraggableSettings = () => {
         >
           <HandIcon />
         </div>
+        <span className="font-bold uppercase">Settings</span>
         <button onClick={handleCollapse} className="cursor-pointer">
           <span className="sr-only">collapse or open settings</span>
           {isCollapsed ? <ChevronsUpDownIcon /> : <ChevronsDownUpIcon />}
