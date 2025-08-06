@@ -51,7 +51,7 @@ export default function Modal() {
           />
         </label>
 
-        <Button onClick={() => setOpen(false)}>Close</Button>
+        <Button className="sm:px-10" onClick={() => setOpen(false)}>Close</Button>
       </div>
     </dialog>,
 
