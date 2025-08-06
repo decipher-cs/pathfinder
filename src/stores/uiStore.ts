@@ -39,7 +39,7 @@ export const uiProxy = proxy<z.infer<typeof UiProxy>>(
     selectedAlgorithm: availableAlgorithms[1],
     showGridLines: true,
     gap: 1.1,
-    ambientLight: 0.1,
+    ambientLight: 0.2,
     soundOn: true,
   }
 )
