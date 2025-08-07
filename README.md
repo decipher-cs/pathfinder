@@ -1,5 +1,7 @@
 # Trailblazer v3.0
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/35789d5b-ece6-437f-b162-2dff1643b529/deploy-status)](https://app.netlify.com/projects/path-visualize/deploys)
+
 A 3D pathfinder. Select a start and end point and choose an algorithm to find the shortest path between the two points.
 
 ## Preview
