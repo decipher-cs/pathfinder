@@ -3,6 +3,7 @@ import {
   coordinatesToIndex,
   getAdjacentNodesCoords,
   getRandom,
+  indexToCoordinates,
   initializeMaze,
 } from "../util"
 import { proxy, snapshot, subscribe } from "valtio"
@@ -57,13 +58,18 @@ export const mazeProxy = proxy<z.infer<typeof MazeProxy>>(
 
 export const getNode = (arg: Position | number) => {
   if (typeof arg === "number") {
-    if (arg < 0) return
+    if (arg < 0 || arg > mazeProxy.nodes.length - 1) return
     return mazeProxy.nodes[arg]
   }
 
   if (Array.isArray(arg)) {
     const rank = mazeProxy.rank
     const [x, y, z] = arg
+
+    // To make sure that xyz do not exceed the bounds, get the max possible value for xyz
+    const [maxX, maxY, maxZ] = indexToCoordinates(rank * rank * rank - 1, rank)
+    if (x > maxX || y > maxY || z > maxZ) return
+
     if (x < 0 || y < 0 || z < 0) return
     return mazeProxy.nodes[coordinatesToIndex(arg, rank)]
   }
