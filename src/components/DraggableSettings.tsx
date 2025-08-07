@@ -11,6 +11,7 @@ import { clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { ChevronsDownUpIcon, ChevronsUpDownIcon, HandIcon } from "lucide-react"
 import Button from "./Button"
+import { modalProxy } from "../stores/modalStore"
 
 export const DraggableSettings = () => {
   const [position, setPosition] = useState({ x: 3, y: 3 })
@@ -207,13 +208,7 @@ export const DraggableSettings = () => {
       >
         <div className="mb-4 flex flex-wrap place-content-center gap-2">
           <Button onClick={() => mazeProxy.logMaze()}>Log</Button>
-          <Button
-            onClick={() => {
-              /*TODO open instructions modal*/
-            }}
-          >
-            Instructions
-          </Button>
+          <Button onClick={() => (modalProxy.open = true)}>Instructions</Button>
           <Button onClick={() => mazeProxy.randomizeMaze()}>Randomize</Button>
           <Button
             onClick={() => {
