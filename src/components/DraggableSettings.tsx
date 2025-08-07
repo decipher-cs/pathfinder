@@ -245,8 +245,7 @@ export const DraggableSettings = () => {
             onClick={() => {
               mazeProxy.resetAllNodesToOpen()
               mazeProxy.setIsMazeEditable(true)
-              window.localStorage.removeItem("UI")
-              window.localStorage.removeItem("MAZE")
+              window.localStorage.clear()
             }}
           >
             clear memory
