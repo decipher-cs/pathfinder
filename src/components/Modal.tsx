@@ -1,19 +1,13 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 import Button from "./Button"
 import { createPortal } from "react-dom"
+import { modalProxy } from "../stores/modalStore"
+import { useSnapshot } from "valtio"
 
 export default function Modal() {
-  const initial = localStorage.getItem("modal on startup") === "true"
-
   const ref = useRef<HTMLDialogElement>(null)
 
-  const [showOnStartup, setShowOnStartup] = useState(initial)
-
-  const [open, setOpen] = useState(initial)
-
-  useEffect(() => {
-    localStorage.setItem("modal on startup", String(showOnStartup))
-  }, [showOnStartup])
+  const { openOnStartup, open } = useSnapshot(modalProxy)
 
   useEffect(() => {
     const el = ref.current
@@ -28,7 +22,7 @@ export default function Modal() {
     <dialog
       ref={ref}
       onKeyDown={(e) => {
-        if (e.key === "Escape") setOpen(false)
+        if (e.key === "Escape") modalProxy.open = false
       }}
       className="top-1/2 z-50 mx-auto grid max-h-11/12 max-w-[70ch] -translate-y-1/2 grid-rows-[min-content_1fr_min-content] gap-3 rounded-lg bg-neutral-200 p-2 backdrop:backdrop-blur-sm backdrop:backdrop-grayscale-100 sm:p-4"
     >
@@ -46,12 +40,14 @@ export default function Modal() {
           <input
             type="checkbox"
             className="accent-neutral-800"
-            onChange={(e) => setShowOnStartup(e.target.checked)}
-            checked={showOnStartup}
+            onChange={(e) => {
+              modalProxy.openOnStartup = e.target.checked
+            }}
+            checked={openOnStartup}
           />
         </label>
 
-        <Button className="sm:px-10" onClick={() => setOpen(false)}>
+        <Button className="sm:px-10" onClick={() => (modalProxy.open = false)}>
           Close
         </Button>
       </div>
