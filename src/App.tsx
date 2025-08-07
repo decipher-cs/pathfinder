@@ -52,7 +52,7 @@ const Scene = () => {
   const audioRef = useRef<HTMLAudioElement>(null)
   if (!audioRef?.current) audioRef.current = new Audio(sound)
 
-  const { orbitControlsEnabled, showGridLines, ambientLight } = useSnapshot(uiProxy)
+  const { orbitControlsEnabled, showGridLines, ambientLight, idleAnimation } = useSnapshot(uiProxy)
 
   useEffect(() => {
     if (!uiProxy.soundOn) return
@@ -70,6 +70,7 @@ const Scene = () => {
     const el = ref.current
     if (!el) return
 
+    if (!idleAnimation) return
     if (isIdle) el.rotation.y += delta * 0.1
     else el.rotation.y = 0
   })

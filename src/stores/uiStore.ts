@@ -23,6 +23,7 @@ export const UiProxy = z.object({
   gap: z.number(),
   ambientLight: z.number(),
   soundOn: z.boolean(),
+  idleAnimation: z.boolean(),
 })
 
 const getLocalStorageData = () => {
@@ -41,6 +42,7 @@ export const uiProxy = proxy<z.infer<typeof UiProxy>>(
     gap: 1.1,
     ambientLight: 0.2,
     soundOn: true,
+    idleAnimation: true,
   }
 )
 

@@ -79,6 +79,7 @@ export const DraggableSettings = () => {
     ambientLight,
     soundOn,
     showGridLines,
+    idleAnimation,
   } = useSnapshot(uiProxy, { sync: true })
 
   const { rank } = useSnapshot(mazeProxy.mazeProxy)
@@ -153,6 +154,18 @@ export const DraggableSettings = () => {
         onChange: (e) => {
           const checked = e.target.checked
           uiProxy.showGridLines = checked
+        },
+      },
+    },
+    {
+      label: "Idle Animation",
+      inputProps: {
+        id: "Idle Animation",
+        type: "checkbox",
+        checked: idleAnimation,
+        onChange: (e) => {
+          const checked = e.target.checked
+          uiProxy.idleAnimation = checked
         },
       },
     },
