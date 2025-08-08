@@ -12,6 +12,7 @@ import { twMerge } from "tailwind-merge"
 import { ChevronsDownUpIcon, ChevronsUpDownIcon, HandIcon } from "lucide-react"
 import Button from "./Button"
 import { modalProxy } from "../stores/modalStore"
+import { GithubIcon, HistoryIcon } from "lucide-react"
 
 export const DraggableSettings = () => {
   const [position, setPosition] = useState({ x: 3, y: 3 })
@@ -184,6 +185,7 @@ export const DraggableSettings = () => {
         height: isCollapsed ? "min-content" : "auto",
       }}
     >
+      {/* Handle and title */}
       <div className="flex justify-between rounded-t-sm bg-neutral-800 px-3 py-2 text-neutral-300">
         <div
           onMouseDown={handleMouseDown}
@@ -199,6 +201,7 @@ export const DraggableSettings = () => {
         </button>
       </div>
 
+      {/* Collapsing Body */}
       <div
         className={twMerge(
           clsx(isCollapsed ? "h-0 py-0" : "h-auto py-3"),
@@ -206,7 +209,7 @@ export const DraggableSettings = () => {
         )}
         style={{ transition: "height 0.2s ease-in-out, padding 0.2s ease-in-out" }}
       >
-        <div className="mb-4 flex flex-wrap place-content-center gap-2">
+        <div className="flex flex-wrap place-content-center gap-2">
           <Button onClick={() => mazeProxy.logMaze()}>Log</Button>
           <Button onClick={() => (modalProxy.open = true)}>Instructions</Button>
           <Button onClick={() => mazeProxy.randomizeMaze()}>Randomize</Button>
@@ -247,7 +250,7 @@ export const DraggableSettings = () => {
           </Button>
         </div>
 
-        <div className="grid gap-2">
+        <div className="grid gap-3">
           <fieldset>
             <legend className={legendClassName}>
               Mouse Drag Behavior
@@ -339,6 +342,27 @@ export const DraggableSettings = () => {
               <input type="number" {...inputProps} className="py rounded-sm bg-neutral-200 px-2" />
             </div>
           ))}
+        </div>
+
+        <div className="flex flex-wrap gap-1 sm:gap-3">
+          <a
+            target="_blank"
+            href="https://github.com/decipher-cs/pathfinder"
+            className={anchorClassName}
+            title="Source Code"
+          >
+            <GithubIcon />
+            <span className="sr-only">source code</span>
+          </a>
+          <a
+            target="_blank"
+            href="https://v2-superseded--path-visualize.netlify.app/"
+            className={anchorClassName}
+            title="Older Website"
+          >
+            <HistoryIcon />
+            <span className="sr-only">go to older website</span>
+          </a>
         </div>
       </div>
     </div>

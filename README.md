@@ -44,6 +44,7 @@ Typescript, React, Vite, Valtio, Tailwind, Three.js, React Three Fiber, React Th
 - [x] Add sound ~when moving cursor along the nodes~
 - [x] Hide/Unhide settings
 - [x] Add animations
+- [x] Link to v2 (prev website)
 
 ## Acknowledgment
 
