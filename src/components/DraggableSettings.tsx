@@ -175,6 +175,7 @@ export const DraggableSettings = () => {
 
   const labelClassName = "flex gap-1 capitalize"
   const legendClassName = "grid grid-cols-2 items-center"
+  const anchorClassName = "p-2 sm:p-3 bg-black rounded-full text-white"
 
   return (
     <div
