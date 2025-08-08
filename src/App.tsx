@@ -21,7 +21,7 @@ import Modal from "./components/Modal"
 
 function App() {
   return (
-    <main className="grid min-h-svh min-w-full grid-cols-1 grid-rows-[1fr_auto] bg-[#303035]">
+    <main className="relative grid min-h-svh min-w-full grid-cols-1 grid-rows-[1fr_auto] bg-[#303035]">
       <div className="">
         <Canvas
           gl={{ antialias: true }}

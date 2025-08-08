@@ -179,7 +179,7 @@ export const DraggableSettings = () => {
 
   return (
     <div
-      className={"absolute z-50 w-[40ch] overflow-hidden rounded-xl bg-neutral-300 shadow-2xl"}
+      className={"absolute z-50 flex max-h-[80svh] w-[40ch] flex-col overflow-hidden"}
       style={{
         transform: `translate(${position.x}px, ${position.y}px)`,
         resize: isCollapsed ? "none" : "both",
@@ -205,8 +205,8 @@ export const DraggableSettings = () => {
       {/* Collapsing Body */}
       <div
         className={twMerge(
-          clsx(isCollapsed ? "h-0 py-0" : "h-auto py-3"),
-          "max-h-full overflow-y-scroll px-3 accent-neutral-700"
+          clsx(isCollapsed ? "h-0 py-0" : "h-max py-3"),
+          "grid max-h-full gap-6 overflow-y-scroll rounded-bl-2xl bg-neutral-300 px-3 accent-neutral-700"
         )}
         style={{ transition: "height 0.2s ease-in-out, padding 0.2s ease-in-out" }}
       >
