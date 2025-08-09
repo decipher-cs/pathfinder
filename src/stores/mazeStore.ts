@@ -129,8 +129,8 @@ export const resizeMaze = (rank: number) => {
 export const randomizeMaze = () => {
   mazeProxy.nodes.forEach((node, i) => {
     if (!node) return
-    const rand = getRandom(1)
-    node.state = rand === 1 ? "blocked" : "open"
+    const rand = getRandom(10)
+    node.state = rand > 6 ? "blocked" : "open"
   })
 
   // Recursively find index for a valid node
