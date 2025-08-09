@@ -18,6 +18,7 @@ import sound from "./assets/sounds/startup.mp3"
 import { idleProxy } from "./stores/idleTrackerStore"
 import { Toasts } from "./components/Toasts"
 import Modal from "./components/Modal"
+import ViewportRestriction from "./components/ViewportRestriction";
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
       <Toasts />
       <DraggableSettings />
       <Modal />
+      <ViewportRestriction />
 
       {import.meta.env.DEV && <Stats />}
     </main>
