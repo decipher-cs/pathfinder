@@ -45,6 +45,9 @@ Typescript, React, Vite, Valtio, Tailwind, Three.js, React Three Fiber, React Th
 - [x] Hide/Unhide settings
 - [x] Add animations
 - [x] Link to v2 (prev website)
+- [ ] Make settings draggable on mobile with touch
+- [ ] Optimize size to reduce chunks that exceed 500KB
+
 
 ## Acknowledgment
 
