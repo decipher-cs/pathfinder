@@ -44,8 +44,6 @@ function App() {
       <DraggableSettings />
       <Modal />
       <ViewportRestriction />
-
-      {import.meta.env.DEV && <Stats />}
     </main>
   )
 }
