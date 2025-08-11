@@ -8,7 +8,7 @@ export default function ViewportRestriction() {
     const el = ref.current
     if (!el) return
 
-    const fo = () => {
+    const fn = () => {
       const styles = getComputedStyle(document.documentElement)
       const smBreakpointRem = Number(
         styles.getPropertyValue("--breakpoint-sm").trim().replace("rem", "")
@@ -20,9 +20,11 @@ export default function ViewportRestriction() {
       else if (winWidth > smBreakpointPx) el.close()
     }
 
-    window.addEventListener("resize", fo)
+    fn()
+
+    window.addEventListener("resize", fn)
     return () => {
-      window.removeEventListener("resize", fo)
+      window.removeEventListener("resize", fn)
     }
   }, [])
 
