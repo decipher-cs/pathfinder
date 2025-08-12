@@ -1,4 +1,3 @@
-import { Vector3 } from "three"
 import { type Position, type Maze, type Node } from "./stores/mazeStore"
 import { proxy } from "valtio"
 
@@ -46,13 +45,13 @@ export const initializeMaze = (rank = 5): Maze => {
 
 export const getAdjacentNodesCoords = (position: Position): Position[] => {
   // prettier-ignore
-  const directions = [ [1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1] ]
-  const result = []
+  const directions = [ [1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1] ] as const
+  const result: Position[] = []
 
   for (const dir of directions) {
-    const vec1 = new Vector3(...dir)
-    const vec2 = new Vector3(...position)
-    result.push(vec1.add(vec2).toArray())
+    const [x, y, z] = dir
+    const [a, b, c] = position
+    result.push([x + a, y + b, z + c])
   }
   return result
 }
