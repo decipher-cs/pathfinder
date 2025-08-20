@@ -10,7 +10,7 @@ const colors = {
   alert: "red",
 }
 
-export const Toasts = () => {
+const Toasts = memo(() => {
   const alerts = useSnapshot(alertQProxy.alerts)
 
   return (
@@ -20,9 +20,10 @@ export const Toasts = () => {
       ))}
     </ul>
   )
-}
+})
+Toasts.displayName = "Toasts"
 
-export const Toast = memo(({ message, severity, index }: { index: number } & Alert) => {
+const Toast = memo(({ message, severity, index }: { index: number } & Alert) => {
   return (
     <li
       className={
@@ -49,3 +50,5 @@ export const Toast = memo(({ message, severity, index }: { index: number } & Ale
   )
 })
 Toast.displayName = "Toast"
+
+export default Toasts
